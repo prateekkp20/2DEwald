@@ -36,20 +36,16 @@ float CalTemp(double KEner, int natoms);
 
 void res_vel(double **vel, int natoms, float Temp, float *mass);
 
-
 void wrap_coor(double **PosIons, int natoms, float **boxcell);
 
 void montecarlo(double **PosIons, int natoms, float **boxcell, float *mass, string *type, int n_atomtype, int *natoms_type, string *atomtype,float Temp, int nbondatoms, int *batom1, int *batom2, string *bondpot, double **bondpar, int nnonbondatoms, int *nbatom1, int *nbatom2, string *nonbondpot, double **nonbondpar, int **fixatoms, int **pairs);
-
 
 void minimization(double **PosIons, int natoms, double **ForceIons, float **boxcell, double Pot, string *type, int **fixatoms);
 
 
 pair <double, float>  first_wolfe_brac(double **PosIons, double **PrevPos,double **ForceIons, int natoms,  float **boxcell, double Pot, float c1_wolfe, float alpha, float brac_par, int **fixatoms);
 
-
 void md(double **PosIons, int natoms, float **boxcell, double **vel, double **ForceIons, float *mass, float dt, float Temp, int nbondatoms, int *batom1, int *batom2, string *bondpot, double **bondpar, int nnonbondatoms, int *nbatom1, int *nbatom2, string *nonbondpot, double **nonbondpar, int **fixatoms);
-
 
 void simuAnn(double **PosIons, int natoms, float **boxcell, double **vel, double **ForceIons, float *mass, float dt, float TempB, float TempE, int nbondatoms, int *batom1, int *batom2, string *bondpot, double **bondpar, int nnonbondatoms, int *nbatom1, int *nbatom2, string *nonbondpot, double **nonbondpar, int **fixatoms, int rampsize, int rampstep);
 
@@ -63,11 +59,8 @@ double dist(double **PosIons, int atom1, int atom2, float **box);
 
 double reci_energy(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K);
 
-long double M_n(long double u, int n);
-
-complex<long double> B(int m, int n, int K);
-
-long double dotProduct(long double *v1, long double *v2);
+template<typename T>
+double dotProduct(T v1, T v2, size_t size);
 
 long double dotProductu(double *v1, long double *v2);
 

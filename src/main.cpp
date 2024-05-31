@@ -295,7 +295,9 @@ int main(int argc, char **argv){
 	// chrono::duration<double> elapsed_seconds3 = end3 - start3;
     // time_t end_time3 = std::chrono::system_clock::to_time_t(end3);
 	// cout<< "Elapsed time: " << elapsed_seconds3.count() << " sec\n\n";
-
+	int aw[3]={1,1,1};
+	cout<<dotProduct(boxcell[0],boxcell[0],3);
+	
 	/* using std::chrono::duration_cast; */
 	/* using HR = std::chrono::high_resolution_clock; */
 	/* using HRTimer = HR::time_point; */
