@@ -260,23 +260,23 @@ int main(int argc, char **argv){
 	// print_lammps_input_file(PosIons, chg, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "poscar7.data");
 	float beta=5.42/boxcell[0][0];
 
-	chrono::time_point<std::chrono::system_clock> start, end;
-	start = chrono::system_clock::now();
+	// chrono::time_point<std::chrono::system_clock> start, end;
+	// start = chrono::system_clock::now();
 	double selfenergy=self(n_atomtype, natoms_type, chg, beta)*unitzer;
 	cout<<fixed<<setprecision(5)<<"Self Energy: "<<selfenergy<<" Kcal/mol"<<"\n\n";
-	end = chrono::system_clock::now();
-	chrono::duration<double> elapsed_seconds = end - start;
-    time_t end_time = std::chrono::system_clock::to_time_t(end);
-	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds.count() << " sec\n\n";
+	// end = chrono::system_clock::now();
+	// chrono::duration<double> elapsed_seconds = end - start;
+    // time_t end_time = std::chrono::system_clock::to_time_t(end);
+	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds.count() << " sec\n\n";
 	
-	// chrono::time_point<std::chrono::system_clock> start1, end1;
-	// start1 = chrono::system_clock::now();
-	// double recienergy=reciprocal_n2(PosIons, ion_charges, natoms, a, boxcell,6)*unitzer;
-	// cout<<fixed<<setprecision(5)<<"Reciprocal Energy: "<<recienergy<<" Kcal/mol"<<"\n";
-	// end1 = chrono::system_clock::now();
-	// chrono::duration<double> elapsed_seconds1 = end1- start1;
-    // time_t end_time1 = std::chrono::system_clock::to_time_t(end1);
-	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds1.count() << " sec\n\n";
+	chrono::time_point<std::chrono::system_clock> start1, end1;
+	start1 = chrono::system_clock::now();
+	double recienergy=reciprocal_n2(PosIons, ion_charges, natoms, beta, boxcell,6)*unitzer;
+	cout<<fixed<<setprecision(5)<<"Reciprocal Energy: "<<recienergy<<" Kcal/mol"<<"\n";
+	end1 = chrono::system_clock::now();
+	chrono::duration<double> elapsed_seconds1 = end1- start1;
+    time_t end_time1 = std::chrono::system_clock::to_time_t(end1);
+	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds1.count() << " sec\n\n";
 
 	chrono::time_point<std::chrono::system_clock> start2, end2;
 	start2 = chrono::system_clock::now();
@@ -295,8 +295,6 @@ int main(int argc, char **argv){
 	// chrono::duration<double> elapsed_seconds3 = end3 - start3;
     // time_t end_time3 = std::chrono::system_clock::to_time_t(end3);
 	// cout<< "Elapsed time: " << elapsed_seconds3.count() << " sec\n\n";
-	int aw[3]={1,1,1};
-	cout<<dotProduct(boxcell[0],boxcell[0],3);
 	
 	/* using std::chrono::duration_cast; */
 	/* using HR = std::chrono::high_resolution_clock; */
