@@ -60,7 +60,7 @@ double dist(double **PosIons, int atom1, int atom2, float **box);
 double reci_energy(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K);
 
 template<typename T>
-double dotProduct(T v1, T v2, size_t size);
+double dotProduct(T v1, T v2, size_t size) ;
 
 long double dotProductu(double *v1, long double *v2);
 
