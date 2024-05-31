@@ -55,17 +55,13 @@ double self(int n_atomtype, int *natoms_type, float *chargs, float betaa);
 
 double real(double **PosIons, float *ion_charges, int natoms, double betaa, float **box);
 
-double dist(double **PosIons, int atom1, int atom2, float **box);
+double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r);
 
-double reci_energy(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K);
+double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K);
+
+double dist(double **PosIons, int atom1, int atom2, float **box);
 
 template<typename T>
 double dotProduct(T v1, T v2, size_t size) ;
-
-long double dotProductu(double *v1, long double *v2);
-
-void crossProduct(float *v_A, float *v_B, long double *out);
-
-double bspline(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int M, int n);
 
 long double error(long double a, long double b);
