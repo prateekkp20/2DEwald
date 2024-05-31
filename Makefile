@@ -26,6 +26,7 @@ OBJ_FILES=$(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/dist.o \
 	  $(OBJ_DIR)/dSFMT.o \
 	  $(OBJ_DIR)/error.o \
+	  $(OBJ_DIR)/func.o \
 	  $(OBJ_DIR)/print.o \
 	  $(OBJ_DIR)/real.o \
 	  $(OBJ_DIR)/reciprocal.o \
@@ -37,8 +38,10 @@ all:$(OBJ_FILES) output
 output:$(RAT_OUTPUT)
 
 # Build object files
-$(OBJ_DIR)/main.o:$(SRC_DIR)/main.c
+$(OBJ_DIR)/main.o:$(SRC_DIR)/main.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o $(OBJ_DIR)/main.o $(INC_LIST)
+$(OBJ_DIR)/func.o:$(SRC_DIR)/func.cpp
+	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/func.o $(INC_LIST)
 $(OBJ_DIR)/dSFMT.o:$(SRC_DIR)/dSFMT.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/dSFMT.o $(INC_LIST)
 $(OBJ_DIR)/print.o:$(SRC_DIR)/print.c
