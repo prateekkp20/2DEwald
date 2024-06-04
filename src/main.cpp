@@ -260,14 +260,8 @@ int main(int argc, char **argv){
 	// print_lammps_input_file(PosIons, chg, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "poscar7.data");
 	float beta=5.42/boxcell[0][0];
 
-	// chrono::time_point<std::chrono::system_clock> start, end;
-	// start = chrono::system_clock::now();
 	double selfenergy=self(n_atomtype, natoms_type, chg, beta)*unitzer;
 	cout<<fixed<<setprecision(5)<<"Self Energy: "<<selfenergy<<" Kcal/mol"<<"\n\n";
-	// end = chrono::system_clock::now();
-	// chrono::duration<double> elapsed_seconds = end - start;
-    // time_t end_time = std::chrono::system_clock::to_time_t(end);
-	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds.count() << " sec\n\n";
 	
 	chrono::time_point<std::chrono::system_clock> start1, end1;
 	start1 = chrono::system_clock::now();
@@ -278,6 +272,15 @@ int main(int argc, char **argv){
     time_t end_time1 = std::chrono::system_clock::to_time_t(end1);
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds1.count() << " sec\n\n";
 
+	chrono::time_point<std::chrono::system_clock> start4, end4;
+	start4 = chrono::system_clock::now();
+	double recienergy_ka=reciprocal_kawata(PosIons, ion_charges, natoms, beta, boxcell,6)*unitzer;
+	cout<<fixed<<setprecision(5)<<"Reciprocal Energy Integral: "<<recienergy_ka<<" Kcal/mol"<<"\n";
+	end4 = chrono::system_clock::now();
+	chrono::duration<double> elapsed_seconds4 = end4- start4;
+    time_t end_time4 = std::chrono::system_clock::to_time_t(end4);
+	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds4.count() << " sec\n\n";
+
 	chrono::time_point<std::chrono::system_clock> start2, end2;
 	start2 = chrono::system_clock::now();
 	double realenergy=real(PosIons, ion_charges, natoms, beta, boxcell)*unitzer;
@@ -286,15 +289,6 @@ int main(int argc, char **argv){
 	chrono::duration<double> elapsed_seconds2 = end2 - start2;
     time_t end_time2 = std::chrono::system_clock::to_time_t(end2);
 	cout<< "Elapsed time: " << elapsed_seconds2.count() << " sec\n\n";
-
-	// chrono::time_point<std::chrono::system_clock> start3, end3;
-	// start3 = chrono::system_clock::now();
-	// double recienergy_bs=bspline(PosIons, ion_charges, natoms, a, boxcell,GRID_SIZE,6,BSPLINE_ORDER)*unitzer;
-	// cout<<fixed<<setprecision(5)<<"Reciprocal Energy FFTW: "<<recienergy_bs<<" Kcal/mol"<<"\n";
-	// end3 = chrono::system_clock::now();
-	// chrono::duration<double> elapsed_seconds3 = end3 - start3;
-    // time_t end_time3 = std::chrono::system_clock::to_time_t(end3);
-	// cout<< "Elapsed time: " << elapsed_seconds3.count() << " sec\n\n";
 	
 	/* using std::chrono::duration_cast; */
 	/* using HR = std::chrono::high_resolution_clock; */

@@ -1,7 +1,8 @@
 CC = /usr/bin/g++	
 DEBUGFLAGS = -Wall
-OPTFLAGS = -O3 -fopenmp -pthread
+OPTFLAGS = -O3 -fopenmp -pthread -L/home/prateek/gsl/lib -I/home/prateek/gsl/include #this needs to be changed to the location of installation of gsl in your local computer
 FFTFLAGS = -lfftw3_threads -lfftw3 -lm -lfftw3_omp
+GSLFLAGS = -lgsl -lgslcblas -lm
 
 RUN_DIR=./run
 RAT_OUTPUT=$(RUN_DIR)/coulomb.x
@@ -31,6 +32,7 @@ OBJ_FILES=$(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/real.o \
 	  $(OBJ_DIR)/reciprocal.o \
 	  $(OBJ_DIR)/self.o \
+	  $(OBJ_DIR)/reci_fast.o \
 
 # Make Targets
 all:$(OBJ_FILES) output
@@ -56,9 +58,11 @@ $(OBJ_DIR)/real.o:$(SRC_DIR)/real.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/real.o $(INC_LIST)
 $(OBJ_DIR)/reciprocal.o:$(SRC_DIR)/reciprocal.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reciprocal.o $(INC_LIST)
+$(OBJ_DIR)/reci_fast.o:$(SRC_DIR)/reci_fast.c
+	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_fast.o $(INC_LIST)
 
 $(RAT_OUTPUT):$(OBJ_FILES)
-	$(CC) $(OPTFLAGS) $(INC_LIST) -o $(RAT_OUTPUT) $(OBJ_FILES) $(FFTFLAGS)
+	$(CC) $(OPTFLAGS) $(INC_LIST) -o $(RAT_OUTPUT) $(OBJ_FILES) $(FFTFLAGS) $(GSLFLAGS)
 
 # Clean objects and library
 clean:

@@ -21,5 +21,6 @@ using namespace std;  // this makes all the functions, classes, or a variable in
 #include <thread>
 #include<fftw3.h>
 #include <cstddef>
+#include <gsl/gsl_integration.h>
 
 
