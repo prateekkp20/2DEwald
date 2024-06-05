@@ -71,3 +71,7 @@ template<typename T>
 double dotProduct(T v1, T v2, size_t size) ;
 
 long double error(long double a, long double b);
+
+double M_n(double u, int n);
+
+double reciprocal_fftw(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
