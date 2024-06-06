@@ -13,3 +13,12 @@ double dotProduct(T v1, T v2, size_t size){
 
 template double dotProduct<float*>(float* v1, float* v2, size_t size);
 template double dotProduct<double*>(double* v1, double* v2, size_t size);
+
+template<typename T1>
+void crossProduct(T1 v_A, T1 v_B, double *out){
+   out[0] = v_A[1] * v_B[2] - v_A[2] * v_B[1];
+   out[1] = -(v_A[0] * v_B[2] - v_A[2] * v_B[0]);
+   out[2] = v_A[0] * v_B[1] - v_A[1] * v_B[0];
+}
+
+template void crossProduct<float*>(float*, float*, double*);
