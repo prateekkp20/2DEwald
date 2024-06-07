@@ -42,10 +42,11 @@ double reciprocal_fftw_integrand(double h, void *params){
     float **box = p->box;
     int K = p->K;
     int Grid = p->Grid;
-    int n = p->n;
-
     // n: order of b-spline interpolation
+    int n = p->n;
+    
     // initializing the new variables
+
     // Structure Factor 
     complex<double> **StructFact;
     StructFact = new complex<double> *[Grid];
@@ -53,21 +54,15 @@ double reciprocal_fftw_integrand(double h, void *params){
         StructFact[i] = new complex<double> [Grid];
     }
 
-    for (int  i = 0; i < Grid; i++){
-        StructFact[i] = new complex<double> *[Grid];
-        for (int j = 0; j < Grid; j++){
-            StructFact[i][j] = new complex<double> [Grid];
-        }
-    }
-    cout<<StructFact[1][2][2]<<"\n";
-
-    double G[3][3], m[3];
+    // G: Reciprocal Vectors
+    // u: the fractional coordinates in x and y directions
+    // x_direc, y_direc, z_direc: the cofficients in the x,y and z directions for the Q Matrix
+    double G[3][3];
     double **u,**x_direc, **y_direc, **z_direc;
     u= new double * [natoms];
     x_direc = new double * [natoms];
     y_direc = new double * [natoms];
     z_direc = new double * [natoms];
-
     for (int  i = 0; i < natoms; i++){
         u[i] = new double  [2]; // We only need these in x and y direction 
         x_direc[i] = new double  [Grid];
@@ -75,8 +70,10 @@ double reciprocal_fftw_integrand(double h, void *params){
         z_direc[i] = new double  [Grid];
     }
 
+    // Length edges of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
-    int n_max=2;
+    
+    int l_max=2;
 
     // Volume Calculations
     double A[3];
@@ -92,7 +89,7 @@ double reciprocal_fftw_integrand(double h, void *params){
         for (int q = 0; q < 3; q++)
             G[x][q] /= volume;
 
-    // Calculating the fractional coordinates of x and y
+    // Calculating the fractional coordinates in x and y directions
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 2; j++){
             u[i][j]=Grid*dotProduct(PosIons[i],G[j],3);
@@ -104,14 +101,14 @@ double reciprocal_fftw_integrand(double h, void *params){
         // for X direction
         for (int  k1 = 0; k1 < Grid; k1++){
             x_direc[i][k1]=0;
-            for (int  n1 = -n_max; n1 < n_max+1; n1++){
+            for (int  n1 = -l_max; n1 < l_max+1; n1++){
                 x_direc[i][k1]+=M_n(u[i][0]-k1-n1*K,n);
             }
         }
         // for Y direction
         for (int  k2 = 0; k2 < Grid; k2++){
             y_direc[i][k2]=0;
-            for (int  n2 = -n_max; n2 < n_max+1; n2++){
+            for (int  n2 = -l_max; n2 < l_max+1; n2++){
                 y_direc[i][k2]+=M_n(u[i][1]-k2-n2*K,n);
             }
         }
@@ -120,13 +117,13 @@ double reciprocal_fftw_integrand(double h, void *params){
             z_direc[i][k3]=M_n(PosIons[i][2]-k3,n);
         }
     }
-
+    int tz_max = 100;
     fftw_complex *in;   // input variable using standard fftw syntax
-    fftw_complex *out;	// output variable
+    fftw_complex *out_tz;	// output variable
     in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *Grid*Grid);
-    out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *Grid*Grid);
-    fftw_plan p;
-    p = fftw_plan_dft_2d(K,K, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    out_tz = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *Grid*Grid);
+    fftw_plan plan;
+    plan = fftw_plan_dft_2d(K,K, in, out_tz, FFTW_FORWARD, FFTW_ESTIMATE);
 
     for (int i = 0; i < Grid; i++){
         
