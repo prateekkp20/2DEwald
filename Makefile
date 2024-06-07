@@ -61,7 +61,7 @@ $(OBJ_DIR)/reciprocal.o:$(SRC_DIR)/reciprocal.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reciprocal.o $(INC_LIST)
 $(OBJ_DIR)/reci_fast.o:$(SRC_DIR)/reci_fast.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_fast.o $(INC_LIST)
-$(OBJ_DIR)/reci_fftw.o:$(SRC_DIR)/reci_fftw.c
+$(OBJ_DIR)/reci_fftw.o:$(SRC_DIR)/reci_fftw.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_fftw.o $(INC_LIST)
 
 $(RAT_OUTPUT):$(OBJ_FILES)
