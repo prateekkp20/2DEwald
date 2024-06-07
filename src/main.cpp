@@ -281,6 +281,15 @@ int main(int argc, char **argv){
     time_t end_time4 = std::chrono::system_clock::to_time_t(end4);
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds4.count() << " sec\n\n";
 
+	chrono::time_point<std::chrono::system_clock> start5, end5;
+	start5 = chrono::system_clock::now();
+	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6, 20 ,4)*unitzer;
+	cout<<fixed<<setprecision(5)<<"Reciprocal Energy FFT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
+	end5 = chrono::system_clock::now();
+	chrono::duration<double> elapsed_seconds5 = end5 - start5;
+    time_t end_time5 = std::chrono::system_clock::to_time_t(end5);
+	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds5.count() << " sec\n\n";
+
 	chrono::time_point<std::chrono::system_clock> start2, end2;
 	start2 = chrono::system_clock::now();
 	double realenergy=real(PosIons, ion_charges, natoms, beta, boxcell)*unitzer;
@@ -289,7 +298,20 @@ int main(int argc, char **argv){
 	chrono::duration<double> elapsed_seconds2 = end2 - start2;
     time_t end_time2 = std::chrono::system_clock::to_time_t(end2);
 	cout<< "Elapsed time: " << elapsed_seconds2.count() << " sec\n\n";
-	
+
+	int Grid = 4;
+	complex<double> ***StructFact;
+    StructFact = new complex<double> **[Grid];
+    for (int  i = 0; i < Grid; i++){
+        StructFact[i] = new complex<double> *[Grid];
+        for (int j = 0; j < Grid; j++){
+            StructFact[i][j] = new complex<double> [Grid];
+        }
+    }
+			StructFact[1][2][2]=1.0 + 2i;
+    // cout<<norm(StructFact[1][2][2])<<"\n";
+	// cout<<setprecision(15)<<M_n(0.134,7)<<"\n";
+
 	/* using std::chrono::duration_cast; */
 	/* using HR = std::chrono::high_resolution_clock; */
 	/* using HRTimer = HR::time_point; */

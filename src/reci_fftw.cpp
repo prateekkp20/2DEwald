@@ -32,8 +32,18 @@ double M_n(double u, int n){
     }
 }
 
-// double reciprocal_fftw_integrand(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n){
-double reciprocal_fftw_integrand(double h, void *params){
+complex<double>Coeff(double v, double w){
+    const complex<double> t(0, 1);
+    complex<double> bi_mi=exp(t*v*(w-1));
+    complex<double> denox;
+    for (double f = 0; f < w-1; f++){
+        denox+=M_n(f+1,w)*exp(1.0*t*f*v);
+    }
+    bi_mi/=denox;
+    return bi_mi;
+}
+
+double reciprocal_fft_integrand(double h, void *params){
     reciprocal_n_params* p = (struct reciprocal_n_params*)params;
     double **PosIons = p->PosIons;
     float *ion_charges = p->ion_charges;
@@ -44,15 +54,15 @@ double reciprocal_fftw_integrand(double h, void *params){
     int Grid = p->Grid;
     // n: order of b-spline interpolation
     int n = p->n;
-    
+
     // initializing the new variables
 
     // Structure Factor 
-    complex<double> **StructFact;
-    StructFact = new complex<double> *[Grid];
-    for (int  i = 0; i < Grid; i++){
-        StructFact[i] = new complex<double> [Grid];
-    }
+    // complex<double> **StructFact;
+    // StructFact = new complex<double> *[Grid];
+    // for (int  i = 0; i < Grid; i++){
+    //     StructFact[i] = new complex<double> [Grid];
+    // }
 
     // G: Reciprocal Vectors
     // u: the fractional coordinates in x and y directions
@@ -95,7 +105,9 @@ double reciprocal_fftw_integrand(double h, void *params){
             u[i][j]=Grid*dotProduct(PosIons[i],G[j],3);
         }
     }
-    
+
+    // maximum coordinate along the z axis
+    double ZCoord_max = 0;
     // Calculating the cofficients in the x,y and z directions for the Q Matrix
     for (int i = 0; i < natoms; i++){
         // for X direction
@@ -115,29 +127,98 @@ double reciprocal_fftw_integrand(double h, void *params){
         // for Z direction
         for (int  k3 = 0; k3 < Grid; k3++){
             z_direc[i][k3]=M_n(PosIons[i][2]-k3,n);
+            ZCoord_max = max(ZCoord_max,PosIons[i][2]); 
         }
     }
-    int tz_max = 100;
+
     fftw_complex *in;   // input variable using standard fftw syntax
-    fftw_complex *out_tz;	// output variable
+    fftw_complex *out;	// output variable
     in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *Grid*Grid);
-    out_tz = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *Grid*Grid);
+    out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) *Grid*Grid);
     fftw_plan plan;
-    plan = fftw_plan_dft_2d(K,K, in, out_tz, FFTW_FORWARD, FFTW_ESTIMATE);
+    plan = fftw_plan_dft_2d(Grid,Grid, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
+    int tz_max = ZCoord_max-n;
+    int tz_min = -n;
 
-    for (int i = 0; i < Grid; i++){
-        
+    for (int x = 0; x < Grid; x++){
+        for (int y = 0; y < Grid; y++){
+            in[x * Grid + y][0] = 0.0;
+            in[x * Grid + y][1] = 0.0;
+        }
     }
+    // Final Q Matrix after the fourier integral along the z direction
+    for (int tz = tz_min; tz <= tz_max; tz++){
+        if (natoms == 0) continue;
+        for (int j = 0; j < natoms; j++){
+
+            for (int tx = 0; tx < Grid; tx++){
+                if (x_direc[j][tx] == 0)continue;
+
+                for (int ty = 0; ty < Grid; ty++){
+                    if (y_direc[j][ty] == 0)continue;
+
+                    in[tx * Grid + ty][REAL] += ion_charges[j]*x_direc[j][tx]*y_direc[j][ty]*z_direc[j][tz] * cos(h*tz);
+                    in[tx * Grid + ty][IMAG] += ion_charges[j]*x_direc[j][tx]*y_direc[j][ty]*z_direc[j][tz] * sin(h*tz);
+                }
+            }
+        }
+    }
+
+    fftw_execute(plan);
+    fftw_destroy_plan(plan);
+    fftw_cleanup();
+ 
+    long double reciprocal_energy_i=0;
+    int ii,jj,kk;
+    double deno = 4*betaa*betaa;
+    double FourPiPi = 4*M_PI*M_PI;
+    double TwoPi_Grid = 2*M_PI/Grid;
+    for (int i = -K; i < K+1; i++){
+        for (int j = -K; j< K+1; j++){
+            if(i==0&&j==0)continue;
+            if(i<0) ii=Grid+i;
+            else ii=i;
+            if(j<0) jj=Grid+j;
+            else  jj=j;
+            int temp = ii * Grid + jj;
+            double factor = FourPiPi * (i*i+j*j) + h*h;
+            double norm_FQ = out[temp][REAL]*out[temp][REAL]+out[temp][IMAG]*out[temp][IMAG];
+            // cout<<setprecision(18)<<norm_FQ<<"\n";
+            // cout<<setprecision(18)<<reciprocal_energy_i<<"\n";
+            // cout<<setprecision(30)<<-factor/deno<<"\n";
+            // cout<<setprecision(18)<<norm_FQ * exp(-factor/deno) * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n)) /factor<<"\n";
+            // cout<<setprecision(18)<<norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n))<<"\n";
+            reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n)) / (factor*exp(factor/deno));
+
+        }
+    }
+    reciprocal_energy_i*=1/(Length[0]*Length[1]);
+    return reciprocal_energy_i;
+}
+
+
+double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n){
+    // this is for Ui
+    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
+
+    gsl_function F;
+    F.function = &reciprocal_fft_integrand; // Set the function to integrate
+    reciprocal_n_params params = {PosIons, ion_charges, natoms, betaa, box, K, Grid, n};
+    F.params = &params;
+
+    double result, error;
+    gsl_integration_qagi(&F, 1e-7, 1e-2, 1000, workspace, &result, &error);
+    gsl_integration_workspace_free(workspace); // Free workspace memory
     
-
-
+    double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
     double reciprocal_energy_o=0;
+
     // this is the loop for Uo
-    #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_o) collapse(2)
     for (int  i = 0; i < natoms; i++){
         for (int j = 0; j < natoms; j++){
             reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
         }
     }
-    return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1]);
+    return result;
+    // return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+result;
 }

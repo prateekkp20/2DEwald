@@ -70,8 +70,15 @@ double dist(double **PosIons, int atom1, int atom2, float **box);
 template<typename T>
 double dotProduct(T v1, T v2, size_t size) ;
 
+template<typename T1>
+void crossProduct(T1 v_A, T1 v_B, double *out);
+
 long double error(long double a, long double b);
 
 double M_n(double u, int n);
 
-double reciprocal_fftw(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
+complex<double>Coeff(double v, double w);
+
+double reciprocal_fft_integrand(double h, void *params);
+
+double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
