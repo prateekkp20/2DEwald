@@ -82,3 +82,5 @@ complex<double>Coeff(double v, double w);
 double reciprocal_fft_integrand(double h, void *params);
 
 double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
+
+double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);

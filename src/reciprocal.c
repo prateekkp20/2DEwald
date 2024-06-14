@@ -3,7 +3,7 @@
 #include "fundec.h"
 
 double F_0(double Del_z, double beta){
-    double a = (1-exp(-Del_z*beta))/beta;
+    double a = (1-exp(-Del_z*Del_z*beta*beta))/beta;
     double b = sqrt(M_PI)*Del_z*erf(beta*Del_z);
     return a-b;
 }
@@ -30,7 +30,7 @@ double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool 
 double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K){
     double reciprocal_energy_i=0;
     double reciprocal_energy_o=0;
-
+    omp_set_num_threads(thread::hardware_concurrency());
     // this is the loop for Ui
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
     for (int k = -K; k < K+1; k++){
@@ -41,17 +41,19 @@ double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double be
             // The double loop sum over natoms in divided into two for loops:
             // (1) j<i
             // (2) j==i
+            #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i)
             for (int i = 0; i < natoms; i++){
                 for (int j = 0; j < i; j++){
                     reciprocal_energy_i+=2*ion_charges[i]*ion_charges[j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false);
                 }
             }
+            #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i)
             for (int i = 0; i < natoms; i++){
                 reciprocal_energy_i+=ion_charges[i]*ion_charges[i]*F_kl(PosIons[i],PosIons[i],sigma,psi,betaa,true);
             }
         }
     }
-
+    #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_o) collapse(2)
     // this is the loop for Uo
     for (int  i = 0; i < natoms; i++){
         for (int j = 0; j < natoms; j++){
