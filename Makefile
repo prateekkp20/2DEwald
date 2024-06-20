@@ -26,7 +26,6 @@ LIB_DIR=./lib
 OBJ_FILES=$(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/dist.o \
 	  $(OBJ_DIR)/dSFMT.o \
-	  $(OBJ_DIR)/error.o \
 	  $(OBJ_DIR)/func.o \
 	  $(OBJ_DIR)/print.o \
 	  $(OBJ_DIR)/real.o \
@@ -53,8 +52,6 @@ $(OBJ_DIR)/self.o:$(SRC_DIR)/self.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/self.o $(INC_LIST)
 $(OBJ_DIR)/dist.o:$(SRC_DIR)/dist.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/dist.o $(INC_LIST)
-$(OBJ_DIR)/error.o:$(SRC_DIR)/error.c
-	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/error.o $(INC_LIST)
 $(OBJ_DIR)/real.o:$(SRC_DIR)/real.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/real.o $(INC_LIST)
 $(OBJ_DIR)/reciprocal.o:$(SRC_DIR)/reciprocal.c
