@@ -112,16 +112,15 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
     double pi_sq = M_PI*M_PI;
     double PiSq_BetaSq = pi_sq/beta_sq;
     // #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) collapse(3)
-    // #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) 
-    for (int i = -K; i < K+1; i++){
-    // for (int i = -Grid[0]/2; i < Grid[0]/2+1; i++){
-            double y_part =0;
-        for (int j = -K; j< K+1; j++){
-        // for (int j = -Grid[1]/2; j< Grid[1]/2+1; j++){
+    #pragma omp parallel for schedule(dynamic) reduction(+: reciprocal_energy_i) 
+    // for (int i = -K; i < K+1; i++){
+    for (int i = -Grid[0]/2; i < Grid[0]/2; i++){
+        double y_part =0;
+        // for (int j = -K; j< K+1; j++){
+        for (int j = -Grid[1]/2; j< Grid[1]/2; j++){
             double z_part =0;
             // for (int k = -K; k < K+1; k++){
-            for (int k = -Grid[2]/2; k < Grid[2]/2+1; k++){
-                // if(i==0 && j==0 && k==0)continue;
+            for (int k = -Grid[2]/2; k < Grid[2]/2; k++){
                 if(i==0 && j==0)continue;
                 if(i<0) ii=Grid[0]+i;
                 else ii=i;
@@ -131,13 +130,13 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
                 else  kk=k;
                 int temp= ii * (Grid[1] * Grid[2]) + jj * Grid[2] + kk;
                 double norm_FQ = out[temp][REAL]*out[temp][REAL]+out[temp][IMAG]*out[temp][IMAG];
+                double factord = pow((double)k/Grid[2],2);
                 double factor = pow(i/Length[0],2) + pow(j/Length[1],2) + pow((double)k/Grid[2],2);
-                // z_part+= norm_FQ * norm(Coeff(TwoPi_Grid[2]*k,n[2])) / (factor*exp(PiSq_BetaSq*factor));
-                reciprocal_energy_i+= norm_FQ * norm(Coeff(TwoPi_Grid[0]*i,n[0])*Coeff(TwoPi_Grid[1]*j,n[1])*Coeff(TwoPi_Grid[2]*k,n[2])) / (factor*exp(PiSq_BetaSq*factor));
+                z_part+= norm_FQ * norm(Coeff(TwoPi_Grid[2]*k,n[2])) / (factor*exp(PiSq_BetaSq*factord));
             }
-            // reciprocal_energy_i+=z_part*norm(Coeff(TwoPi_Grid[1]*j,n[1]));
+            y_part+=z_part*norm(Coeff(TwoPi_Grid[1]*j,n[1]))/(exp(PiSq_BetaSq*pow(j/Length[1],2)));
         }
-        // reciprocal_energy_i+=y_part*norm(Coeff(TwoPi_Grid[0]*i,n[0]));
+        reciprocal_energy_i+=y_part*norm(Coeff(TwoPi_Grid[0]*i,n[0]))/(exp(PiSq_BetaSq*pow(i/Length[0],2)));
     }
     reciprocal_energy_i/=2*M_PI*Length[0]*Length[1]*Grid[2];
     
@@ -147,6 +146,5 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
             reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
         }
     }
-    // return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+reciprocal_energy_i;
-    return reciprocal_energy_i;
+    return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+reciprocal_energy_i;
 }
