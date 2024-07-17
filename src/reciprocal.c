@@ -2,31 +2,6 @@
 #include "const.h"
 #include "fundec.h"
 
-double F_0(double Del_z, double beta){
-    double a = (1-exp(-Del_z*Del_z*beta*beta))/beta;
-    double b = sqrt(M_PI)*Del_z*erf(beta*Del_z);
-    return a-b;
-}
-
-double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r){
-    if(!same_r){
-        double delX=ri[0]-rj[0];
-        double delY=ri[1]-rj[1];
-        double delZ=ri[2]-rj[2];
-        sigma*=2*M_PI;
-        psi*=2*M_PI;
-        double norm_sigma_psi=sqrt(sigma*sigma+psi*psi);
-        double a = cos(sigma*delX+psi*delY)/norm_sigma_psi;
-        double b = exp(delZ*norm_sigma_psi)*erfc(beta*delZ+(norm_sigma_psi/(2*beta)))+exp(-delZ*norm_sigma_psi)*erfc(-beta*delZ+(norm_sigma_psi/(2*beta)));
-        return a*b;
-    }
-    else{
-        double norm_sigma_psi=2*M_PI*sqrt(sigma*sigma+psi*psi);
-        return (2/norm_sigma_psi)*erfc(norm_sigma_psi/(2*beta));
-    }
-    return 0;
-}
-
 double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K){
     double reciprocal_energy_i=0;
     double reciprocal_energy_o=0;
@@ -44,12 +19,12 @@ double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double be
             #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i)
             for (int i = 0; i < natoms; i++){
                 for (int j = 0; j < i; j++){
-                    reciprocal_energy_i+=2*ion_charges[i]*ion_charges[j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false);
+                    reciprocal_energy_i+=2*ion_charges[i]*ion_charges[j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false,box);
                 }
             }
             #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i)
             for (int i = 0; i < natoms; i++){
-                reciprocal_energy_i+=ion_charges[i]*ion_charges[i]*F_kl(PosIons[i],PosIons[i],sigma,psi,betaa,true);
+                reciprocal_energy_i+=ion_charges[i]*ion_charges[i]*F_kl(PosIons[i],PosIons[i],sigma,psi,betaa,true,box);
             }
         }
     }
