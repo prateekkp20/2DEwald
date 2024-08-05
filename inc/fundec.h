@@ -16,7 +16,7 @@ void printprobVel(double **vel, int natoms, float *mass, float Temp);
 
 double self(int n_atomtype, int *natoms_type, float *chargs, float betaa);
 
-double real(double **PosIons, float *ion_charges, int natoms, double betaa, float **box);
+double real(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff);
 
 double F_0(double Del_z, double beta);
 
@@ -51,3 +51,5 @@ double reciprocal_fft_integrand(double h, void *params);
 double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
 
 double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
+
+double reciprocal_pppm_chebyshev(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
