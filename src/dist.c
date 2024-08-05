@@ -1,5 +1,5 @@
 //***********************************************
-// function to calculate distances according to minimum image convention 
+// function to calculate distances according to minimum image convention for a 2D symmetric system
 //***********************************************
 
 #include "libinclude.h" 
