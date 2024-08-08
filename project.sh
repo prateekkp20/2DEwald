@@ -99,12 +99,12 @@
 
 make clean > terminal.txt
 make >> terminal.txt
-locationcsv="changesize/out.csv"
-locationinput="changesize"
+locationcsv="separate_p_m/z/out.csv"
+locationinput="separate_p_m\/z"
 
 cd run/
-echo "File,beta,Lx,Ly,Lz,E_long,E_coul,Total" > $locationcsv
-lastfile=27
+echo "File,E_long,E_coul,Total" > $locationcsv
+lastfile=4
 for i in $(seq 1 $lastfile)
 do
     sed -i "s/Posfile = ${locationinput}\/POSCAR\.$((i-1))/Posfile = ${locationinput}\/POSCAR\.$i/g" input.in
