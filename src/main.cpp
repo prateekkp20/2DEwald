@@ -269,36 +269,35 @@ int main(int argc, char **argv){
 	double beta=5.42/Lmin;
 	double cutoff = Lmin/2;
 
-	// cout<<fixed<<setprecision(15)<<","<<beta;
-	// cout<<","<<boxcell[0][0]<<","<<boxcell[1][1]<<","<<boxcell[2][2];
-
 	double selfenergy=self(n_atomtype, natoms_type, chg, beta)*unitzer;
-	// cout<<fixed<<setprecision(5)<<"Self Energy: "<<selfenergy<<" Kcal/mol"<<"\n\n";
+	cout<<fixed<<setprecision(5)<<"Self Energy: "<<selfenergy<<" Kcal/mol"<<"\n\n";
 
 	// chrono::time_point<std::chrono::system_clock> start1, end1;
 	// start1 = chrono::system_clock::now();
 	// double recienergy=reciprocal_n2(PosIons, ion_charges, natoms, beta, boxcell,6)*unitzer;
-	// cout<<fixed<<setprecision(15)<<","<<recienergy+selfenergy;
 	// cout<<fixed<<setprecision(15)<<"Reciprocal Energy: "<<recienergy<<" Kcal/mol"<<"\n";
 	// end1 = chrono::system_clock::now();
 	// chrono::duration<double> elapsed_seconds1 = end1- start1;
     // time_t end_time1 = std::chrono::system_clock::to_time_t(end1);
 	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds1.count() << " sec\n\n";
-	// cout<<fixed<<setprecision(15)<<","<<elapsed_seconds1.count();
+
+	chrono::time_point<std::chrono::system_clock> start2, end2;
+	start2 = chrono::system_clock::now();
+	double realenergy=real(PosIons, ion_charges, natoms, beta, boxcell,cutoff)*unitzer;
+	cout<<fixed<<setprecision(15)<<"Real Energy: "<<realenergy<<" Kcal/mol"<<"\n";
+	end2 = chrono::system_clock::now();
+	chrono::duration<double> elapsed_seconds2 = end2 - start2;
+    time_t end_time2 = std::chrono::system_clock::to_time_t(end2);
+	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds2.count() << " sec\n\n";
 
 	chrono::time_point<std::chrono::system_clock> start4, end4;
 	start4 = chrono::system_clock::now();
 	double recienergy_ka=reciprocal_kawata(PosIons, ion_charges, natoms, beta, boxcell,6)*unitzer;
-	cout<<fixed<<setprecision(15)<<","<<recienergy_ka+selfenergy;
-	// cout<<fixed<<setprecision(15)<<"Reciprocal Energy Integral: "<<recienergy_ka<<" Kcal/mol"<<"\n";
+	cout<<fixed<<setprecision(15)<<"Reciprocal Energy Integral: "<<recienergy_ka<<" Kcal/mol"<<"\n";
 	end4 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds4 = end4- start4;
     time_t end_time4 = std::chrono::system_clock::to_time_t(end4);
-	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds4.count() << " sec\n\n";
-	// cout<<fixed<<setprecision(15)<<","<<elapsed_seconds4.count();
-
-	// cout<<fixed<<setprecision(15)<<","<<error(recienergy,recienergy_ka);
-	// cout<<fixed<<setprecision(15)<<","<<percentReduction(elapsed_seconds4.count(),elapsed_seconds1.count());
+	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds4.count() << " sec\n\n";
 
 	// chrono::time_point<std::chrono::system_clock> start5, end5;
 	// start5 = chrono::system_clock::now();
@@ -307,39 +306,10 @@ int main(int argc, char **argv){
 	// double recienergy_fft=reciprocal_pppm(PosIons, ion_charges, natoms, beta, boxcell,6, Grid ,order)*unitzer;
 	// cout<<fixed<<setprecision(15)<<","<<recienergy_fft;
 	// cout<<fixed<<setprecision(15)<<"Reciprocal Energy FFT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
-	// cout<<fixed<<setprecision(15)<<"Error: "<<error(recienergy,recienergy_fft)<<"\n";
 	// end5 = chrono::system_clock::now();
 	// chrono::duration<double> elapsed_seconds5 = end5 - start5;
     // time_t end_time5 = std::chrono::system_clock::to_time_t(end5);
 	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds5.count() << " sec\n\n";
-	// cout<<fixed<<setprecision(15)<<","<<elapsed_seconds5.count();
-
-	// cout<<fixed<<setprecision(15)<<","<<error(recienergy,recienergy_fft);
-
-	chrono::time_point<std::chrono::system_clock> start2, end2;
-	start2 = chrono::system_clock::now();
-	double realenergy=real(PosIons, ion_charges, natoms, beta, boxcell,cutoff)*unitzer;
-	cout<<fixed<<setprecision(15)<<","<<realenergy;
-	// cout<<fixed<<setprecision(5)<<"Real Energy: "<<realenergy<<" Kcal/mol"<<"\n";
-	end2 = chrono::system_clock::now();
-	chrono::duration<double> elapsed_seconds2 = end2 - start2;
-    time_t end_time2 = std::chrono::system_clock::to_time_t(end2);
-	// cout<< "Elapsed time: " << elapsed_seconds2.count() << " sec\n\n";
-	// cout<<fixed<<setprecision(15)<<","<<elapsed_seconds2.count();
-
-	// chrono::time_point<std::chrono::system_clock> start6, end6;
-	// start6 = chrono::system_clock::now();
-	// double recienergy_fft_ch=reciprocal_pppm_chebyshev(PosIons, ion_charges, natoms, beta, boxcell,6, Grid ,order)*unitzer;
-	// cout<<fixed<<setprecision(15)<<"Reciprocal Energy FFT Chebyshev: "<<recienergy_fft_ch<<" Kcal/mol"<<"\n";
-	// cout<<fixed<<setprecision(15)<<"Error: "<<error(recienergy,recienergy_fft_ch)<<"\n";
-	// end6 = chrono::system_clock::now();
-	// chrono::duration<double> elapsed_seconds6 = end6 - start6;
-    // time_t end_time6 = std::chrono::system_clock::to_time_t(end6);
-	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds6.count() << " sec\n\n";
-
-	double total = recienergy_ka+realenergy+selfenergy; 
-
-	cout<<fixed<<setprecision(15)<<","<<total;
 
 	/* using std::chrono::duration_cast; */
 	/* using HR = std::chrono::high_resolution_clock; */
@@ -347,12 +317,12 @@ int main(int argc, char **argv){
 	/* using std::chrono::microseconds; */
 	/* using std::chrono::seconds; */
 
-	/*   HRTimer start = HR::now(); */
-	/*  recienergy_bs=bspline(PosIons, ion_charges, natoms, a, boxcell,60,6,5)*unitzer; */
-	/* 	cout<<fixed<<setprecision(5)<<"Reciprocal Energy FFTW: "<<recienergy_bs<<" Kcal/mol"<<"\n"; */
-	/*   HRTimer end = HR::now(); */
-	/*   auto duration = duration_cast<microseconds>(end - start).count(); */
-	/* 	cout<< "Elapsed time: " << duration << " usec"; */
+	/* HRTimer start = HR::now(); */
+	/* recienergy_bs=bspline(PosIons, ion_charges, natoms, a, boxcell,60,6,5)*unitzer; */
+	/* cout<<fixed<<setprecision(5)<<"Reciprocal Energy FFTW: "<<recienergy_bs<<" Kcal/mol"<<"\n"; */
+	/* HRTimer end = HR::now(); */
+	/* auto duration = duration_cast<microseconds>(end - start).count(); */
+	/* cout<< "Elapsed time: " << duration << " usec"; */
 
 	// delete dynamic variables 
 	for(i=0;i<3;i++){
