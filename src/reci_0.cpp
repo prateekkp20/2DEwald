@@ -2,7 +2,7 @@
 #include "const.h"
 #include "fundec.h"
 
-// #define ENABLE_OMP 1
+#define ENABLE_OMP 1
 
 double reci0(double **PosIons, float *ion_charges, int natoms, double betaa, float **box){
     double energy = 0;
@@ -10,7 +10,7 @@ double reci0(double **PosIons, float *ion_charges, int natoms, double betaa, flo
 
     #if defined ENABLE_OMP
         omp_set_num_threads(thread::hardware_concurrency());
-        #pragma omp parallel for simd schedule(runtime) reduction(+: energy)
+        #pragma omp parallel for schedule(runtime) reduction(+: energy)
     #endif
     
     for (int  i = 0; i < natoms; i++){
