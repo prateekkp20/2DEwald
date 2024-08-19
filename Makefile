@@ -31,8 +31,10 @@ OBJ_FILES=$(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/real.o \
 	  $(OBJ_DIR)/reciprocal.o \
 	  $(OBJ_DIR)/self.o \
-	  $(OBJ_DIR)/reci_fast.o \
+	  $(OBJ_DIR)/reci_integral.o \
 	  $(OBJ_DIR)/reciprocal_pppm.o \
+	  $(OBJ_DIR)/reci_0.o \
+	  $(OBJ_DIR)/realnreci0.o \
 
 # Make Targets
 all:$(OBJ_FILES) output
@@ -50,18 +52,22 @@ $(OBJ_DIR)/print.o:$(SRC_DIR)/print.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/print.o $(INC_LIST)
 $(OBJ_DIR)/self.o:$(SRC_DIR)/self.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/self.o $(INC_LIST)
-$(OBJ_DIR)/dist.o:$(SRC_DIR)/dist.c
+$(OBJ_DIR)/dist.o:$(SRC_DIR)/dist.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/dist.o $(INC_LIST)
 $(OBJ_DIR)/real.o:$(SRC_DIR)/real.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/real.o $(INC_LIST)
 $(OBJ_DIR)/reciprocal.o:$(SRC_DIR)/reciprocal.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reciprocal.o $(INC_LIST)
-$(OBJ_DIR)/reci_fast.o:$(SRC_DIR)/reci_fast.c
-	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_fast.o $(INC_LIST)
+$(OBJ_DIR)/reci_integral.o:$(SRC_DIR)/reci_integral.c
+	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_integral.o $(INC_LIST)
 $(OBJ_DIR)/reciprocal_pppm.o:$(SRC_DIR)/reciprocal_pppm.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reciprocal_pppm.o $(INC_LIST)
-# $(OBJ_DIR)/reci_fftw.o:$(SRC_DIR)/reci_fftw.cpp
-	# $(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_fftw.o $(INC_LIST)
+$(OBJ_DIR)/reci_0.o:$(SRC_DIR)/reci_0.cpp
+	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_0.o $(INC_LIST)
+$(OBJ_DIR)/reci_fftw.o:$(SRC_DIR)/reci_fftw.cpp
+	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_fftw.o $(INC_LIST)
+$(OBJ_DIR)/realnreci0.o:$(SRC_DIR)/realnreci0.cpp
+	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/realnreci0.o $(INC_LIST)
 
 $(RAT_OUTPUT):$(OBJ_FILES)
 	$(CC) $(OPTFLAGS) $(INC_LIST) -o $(RAT_OUTPUT) $(OBJ_FILES) $(FFTFLAGS) $(GSLFLAGS)
