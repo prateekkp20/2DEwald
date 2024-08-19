@@ -2,7 +2,7 @@
 #include "const.h"
 #include "fundec.h"
 
-// #define ENABLE_OMP 1
+#define ENABLE_OMP 1
 
 double real(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff){
     double real_energy=0;
