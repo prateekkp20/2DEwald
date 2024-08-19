@@ -29,6 +29,12 @@ double F_0(double Del_z, double beta){
     return a-b;
 }
 
+double F_0_New(double DelZ, double DelZ2, double beta){
+    double a = (1-exp(-DelZ2*beta*beta))/beta;
+    double b = sqrt(M_PI)*DelZ*erf(beta*DelZ);
+    return a-b;
+}
+
 double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, float **box){
     if(!same_r){
         double delX=ri[0]-rj[0];
