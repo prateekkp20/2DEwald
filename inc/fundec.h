@@ -18,7 +18,7 @@ double self(int n_atomtype, int *natoms_type, float *chargs, float betaa);
 
 double real(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff);
 
-double F_0(double Del_z, double beta);
+double F_0(double val);
 
 double F_0_New(double DelZ, double DelZ2, double beta);
 

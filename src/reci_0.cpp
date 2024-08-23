@@ -15,9 +15,9 @@ double reci0(double **PosIons, float *ion_charges, int natoms, double betaa, flo
     
     for (int  i = 0; i < natoms; i++){
         for (int j = 0; j < i; j++){
-            energy+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
+            energy+=ion_charges[i]*ion_charges[j]*F_0((PosIons[i][2]-PosIons[j][2])*betaa);
         }
     }
     
-    return 2*sqrt(M_PI)*energy/(Length[0]*Length[1]);;
+    return 2*sqrt(M_PI)*energy/(betaa*Length[0]*Length[1]);;
 }

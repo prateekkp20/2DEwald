@@ -23,9 +23,9 @@ void crossProduct(T1 v_A, T1 v_B, double *out){
 }
 template void crossProduct<float*>(float*, float*, double*);
 
-double F_0(double Del_z, double beta){
-    double a = (1-exp(-Del_z*Del_z*beta*beta))/beta;
-    double b = sqrt(M_PI)*Del_z*erf(beta*Del_z);
+double F_0(double val){
+    double a = 1-exp(-val*val);
+    double b = sqrt(M_PI)*val*erf(val);
     return a-b;
 }
 

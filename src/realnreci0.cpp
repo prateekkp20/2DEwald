@@ -22,10 +22,10 @@ vector<double> realnreci0(double **PosIons, float *ion_charges, int natoms, doub
                 energy0+=(ion_charges[i]*ion_charges[j]*erfc(betaa*modR))/modR;
             
             // reciprocal energy k=0
-            energy1+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
+            energy1+=ion_charges[i]*ion_charges[j]*F_0((PosIons[i][2]-PosIons[j][2])*betaa);
         }
     }
-    energy1*=2*sqrt(M_PI)/(Length[0]*Length[1]);
+    energy1*=2*sqrt(M_PI)/(betaa*Length[0]*Length[1]);
     energy[0]=energy0;
     energy[1]=energy1;
     return energy;
