@@ -25,6 +25,11 @@ template void crossProduct<float*>(float*, float*, double*);
 
 double F_0(double val){
     double a = 1-exp(-val*val);
+    if(val>3.6){
+        double e = exp(2*val*sqrt(M_PI)*log(2));
+        double b = (e-1)/(e+1);
+        return a - sqrt(M_PI)*val*b;
+    }
     double b = sqrt(M_PI)*val*erf(val);
     return a-b;
 }
