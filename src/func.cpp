@@ -24,13 +24,14 @@ void crossProduct(T1 v_A, T1 v_B, double *out){
 template void crossProduct<float*>(float*, float*, double*);
 
 double F_0(double val){
-    double a = 1-exp(-val*val);
-    if(val>3.6){
-        double e = exp(2*val*sqrt(M_PI)*log(2));
-        double b = (e-1)/(e+1);
-        return a - sqrt(M_PI)*val*b;
+    double val2 = val*val;
+    double a = 1-exp(-val2);
+    double sqrtpi = sqrt(M_PI);
+    if(val>4){
+        double b = 1 - (1-a)/sqrt((2*val2+1)*(M_PI/2)); 
+        return a - sqrtpi*val*b;
     }
-    double b = sqrt(M_PI)*val*erf(val);
+    double b = sqrtpi*val*erf(val);
     return a-b;
 }
 
