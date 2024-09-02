@@ -24,15 +24,15 @@ void crossProduct(T1 v_A, T1 v_B, double *out){
 template void crossProduct<float*>(float*, float*, double*);
 
 double F_0(double val){
-    double val2 = val*val;
-    double a = 1-exp(-val2);
-    double sqrtpi = sqrt(M_PI);
-    if(val>4){
-        double b = 1 - (1-a)/sqrt((2*val2+1)*(M_PI/2)); 
-        return a - sqrtpi*val*b;
-    }
-    double b = sqrtpi*val*erf(val);
-    return a-b;
+    val=fabs(val); //making the input positive
+    // this is the rational approximation of the error function, mentioned in Abramowitz and Stegun, Handbook of Mathematical functions
+    // this give the max errror of e-7 wrt to the actual erf()
+    // float a1 = 0.254829592,a2 = -0.284496736,a3 = 1.421413741,a4 = -1.453152027,a5 = 1.061405429; 
+    double exp_x2 = exp(-val*val);
+    double t, t1 =  t  = 1/(1+0.3275911*val);
+    double erfx = 1 - exp_x2*(0.254829592*t - 0.284496736*(t*=t1) + 1.421413741*(t*=t1) - 1.453152027*(t*=t1) + 1.061405429*(t*=t1));
+    double b = 1.772453850905515*val*erfx;
+    return 1-exp_x2-b;
 }
 
 double F_0_New(double DelZ, double DelZ2, double beta){
