@@ -18,8 +18,13 @@ vector<double> realnreci0(double **PosIons, float *ion_charges, int natoms, doub
 
             // real energy
             double modR=dist(PosIons,i,j,box);
-            if(modR<=cutoff)
-                energy0+=(ion_charges[i]*ion_charges[j]*erfc(betaa*modR))/modR;
+            if(modR<=cutoff){
+                double val = betaa*modR;
+                double exp_x2 = exp(-val*val);
+                double t, t1 =  t  = 1/(1+0.3275911*val);
+                double erfcx = exp_x2*(0.254829592*t - 0.284496736*(t*=t1) + 1.421413741*(t*=t1) - 1.453152027*(t*=t1) + 1.061405429*(t*=t1));
+                energy0+=(ion_charges[i]*ion_charges[j]*erfcx)/modR;
+            }
             
             // reciprocal energy k=0
             energy1+=ion_charges[i]*ion_charges[j]*F_0((PosIons[i][2]-PosIons[j][2])*betaa);
