@@ -332,15 +332,12 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k==0) + Real Energy*/
 	chrono::time_point<std::chrono::system_clock> start7, end7;
 	start7 = chrono::system_clock::now();
-	double energy0=0,energy1=0;
-	// realnreci0(PosIons, ion_charges, natoms, beta, boxcell,cutoff,energy0,energy1);
 	vector<double> energy = realnreci0(PosIons, ion_charges, natoms, beta, boxcell,cutoff);
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy (k==0): "<<energy[1]*unitzer<<" Kcal/mol"<<"\n";
 	cout<<fixed<<setprecision(15)<<"Real Energy : "<<energy[0]*unitzer<<" Kcal/mol"<<"\n";
 	end7 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds7 = end7- start7;
     time_t end_time7 = std::chrono::system_clock::to_time_t(end7);
-	// cout<<fixed<<setprecision(8)<<","<<elapsed_seconds7.count();
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds7.count() << " sec\n\n";
 	// delete dynamic variables 
 	for(i=0;i<3;i++){
