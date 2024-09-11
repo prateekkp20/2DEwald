@@ -28,13 +28,13 @@ double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double be
             }
         }
     }
-    #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_o) collapse(2)
-    // this is the loop for Uo
-    for (int  i = 0; i < natoms; i++){
-        for (int j = 0; j < natoms; j++){
-            reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
-        }
-    }
+    // #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_o) collapse(2)
+    // // this is the loop for Uo
+    // for (int  i = 0; i < natoms; i++){
+    //     for (int j = 0; j < natoms; j++){
+    //         reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
+    //     }
+    // }
     
     return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1]) +(M_PI/(2*Length[0]*Length[1]))*reciprocal_energy_i;
 }
