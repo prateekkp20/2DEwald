@@ -40,6 +40,7 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
             G[x][q] /= volume;
 
     // Calculating the fractional coordinates in x and y directions
+    #pragma omp parallel for simd
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 2; j++){
             u[i][j]=Grid[j]*dotProduct(PosIons[i],G[j],3);
@@ -84,7 +85,7 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
             }
         }
     }
-    #pragma omp for simd
+    #pragma omp parallel for simd
     // Final Q Matrix
     for (int j = 0; j < natoms; j++){
         if (ion_charges[j] == 0)continue;
@@ -111,8 +112,8 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
     double beta_sq = betaa*betaa;
     double pi_sq = M_PI*M_PI;
     double PiSq_BetaSq = pi_sq/beta_sq;
-    // #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) collapse(3)
-    #pragma omp parallel for schedule(dynamic) reduction(+: reciprocal_energy_i) 
+
+    #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) 
     // for (int i = -K; i < K+1; i++){
     for (int i = -Grid[0]/2; i < Grid[0]/2; i++){
         double y_part =0;
@@ -141,10 +142,11 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
     reciprocal_energy_i/=2*M_PI*Length[0]*Length[1]*Grid[2];
     
     // this is the loop for Uo
-    for (int  i = 0; i < natoms; i++){
-        for (int j = 0; j < natoms; j++){
-            reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
-        }
-    }
-    return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+reciprocal_energy_i;
+    // #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_o)
+    // for (int  i = 0; i < natoms; i++){
+    //     for (int j = 0; j < i; j++){
+    //         reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
+    //     }
+    // }
+    return 2*sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+reciprocal_energy_i;
 }
