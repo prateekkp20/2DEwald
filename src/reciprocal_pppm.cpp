@@ -5,7 +5,7 @@
 #define REAL 0
 #define IMAG 1
 
-double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]){
+double reciprocal_pppm(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]){
     /* Side lengths of the unit cell */
     omp_set_num_threads(thread::hardware_concurrency());
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))}; 
