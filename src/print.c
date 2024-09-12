@@ -9,7 +9,7 @@
 
 // print coordinates in readable format
 
-void print_lammps_input_file(double **PosIons, float *chg, int natoms, float **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename){
+void print_lammps_input_file(double **PosIons, float *chg, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename){
 	FILE *pFile;
 
 	pFile = fopen(filename.c_str(), &printmode);
@@ -46,7 +46,7 @@ void print_lammps_input_file(double **PosIons, float *chg, int natoms, float **b
 	fclose(pFile);
 }
 
-void print_coor(double **PosIons, int natoms, float **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename){
+void print_coor(double **PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename){
 
 	FILE *pFile;
 
@@ -98,7 +98,7 @@ void print_coor(double **PosIons, int natoms, float **boxcell, int n_atomtype, i
 	fclose(pFile);
 }
 
-void print_carcoor(double **PosIons, int natoms, float **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename){
+void print_carcoor(double **PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename){
 
 	cout << "****Printing CONTCAR****" << endl;
 
