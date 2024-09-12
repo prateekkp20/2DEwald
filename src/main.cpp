@@ -345,7 +345,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k==0) + Real Energy*/
 	chrono::time_point<std::chrono::system_clock> start7, end7;
 	start7 = chrono::system_clock::now();
-	vector<double> energy = realnreci0(PosIons, ion_charges, natoms, beta, boxcell,cutoff);
+	vector<double> energy = realnreci0(PosIons2, charge_prod, natoms, beta, boxcell,cutoff);
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy (k==0): "<<energy[1]*unitzer<<" Kcal/mol"<<"\n";
 	cout<<fixed<<setprecision(15)<<"Real Energy : "<<energy[0]*unitzer<<" Kcal/mol"<<"\n";
 	end7 = chrono::system_clock::now();

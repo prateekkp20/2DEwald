@@ -22,7 +22,7 @@ double real(double *PosIons2, double *charge_prod, int natoms, double betaa, dou
                     double exp_x2 = exp(-val*val);
                     double t, t1 =  t  = 1/(1+0.3275911*val);
                     double erfcx = exp_x2*(0.254829592*t - 0.284496736*(t*=t1) + 1.421413741*(t*=t1) - 1.453152027*(t*=t1) + 1.061405429*(t*=t1));
-                    real_energy+=(ion_charges[i]*ion_charges[j]*erfcx)/modR;
+                    real_energy+=(charge_prod[i*(i-1)/2+j]*erfcx)/modR;
             }
         }
     
