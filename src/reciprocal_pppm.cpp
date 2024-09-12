@@ -140,11 +140,5 @@ double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double 
     }
     reciprocal_energy_i/=2*M_PI*Length[0]*Length[1]*Grid[2];
     
-    // this is the loop for Uo
-    for (int  i = 0; i < natoms; i++){
-        for (int j = 0; j < natoms; j++){
-            reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
-        }
-    }
     return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+reciprocal_energy_i;
 }
