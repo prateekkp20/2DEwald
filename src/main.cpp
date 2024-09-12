@@ -185,10 +185,10 @@ int main(int argc, char **argv){
 	natoms=0;
 
 	//Creating 3x3 boxcell array
-	float **boxcell;
-	boxcell=new float * [3];
+	double **boxcell;
+	boxcell=new double * [3];
 	for(i = 0; i<3;i++){
-		boxcell[i]=new float [3];
+		boxcell[i]=new double [3];
 	}
 
 	getline(PosIn, garbage); //read overall scaling factor
@@ -209,12 +209,13 @@ int main(int argc, char **argv){
 	getline(PosIn, garbage);
 	getline(PosIn, garbage);
 
-	double **PosIons, **ForceIons, **vel;
+	double **PosIons, *PosIons2, **ForceIons, **vel;
 	int **fixatoms;
-	float *mass;
+	double *mass;
 
-	mass=new float [natoms];
+	mass=new double [natoms];
 	PosIons=new double * [natoms];
+	PosIons2=new double [natoms*3];
 	ForceIons=new double *[natoms];
 	vel=new double *[natoms];
 	fixatoms=new int *[natoms];
@@ -229,6 +230,9 @@ int main(int argc, char **argv){
 	//getting positions of each atom
 	for(i=0;i<natoms;i++){
 		PosIn>>PosIons[i][0]>>PosIons[i][1]>>PosIons[i][2];
+		PosIons2[3*i]=PosIons[i][0];
+		PosIons2[3*i+1]=PosIons[i][1];
+		PosIons2[3*i+2]=PosIons[i][2];
 	}
 
 	PosIn.close();
@@ -241,8 +245,8 @@ int main(int argc, char **argv){
 		exit(1);
 	}
 
-	float *chg;
-	chg=new float [n_atomtype];
+	double *chg;
+	chg=new double [n_atomtype];
 
 	for(int i=0; i<n_atomtype; i++){
 		CHARGEIn>>chg[i];
@@ -251,14 +255,25 @@ int main(int argc, char **argv){
 	CHARGEIn.close();
 
 	//-------------------------creating the charge array for each atom present in the unit cell ------------------------------//
-	float *ion_charges;
-	ion_charges=new float [natoms];
+	double *ion_charges;
+	double *charge_prod;
+	ion_charges=new double [natoms];
+	charge_prod=new (nothrow) double [natoms*(natoms-1)/2];
+	if (!charge_prod){
+    	cout << "Memory allocation failed\n";
+	}
+
 	int c=0;
 	for (int i = 0; i < n_atomtype; i++){
 		for (int j = 0; j < natoms_type[i]; j++){
 			ion_charges[c]=chg[i];
 			c++;
 		}		
+	}
+	for (int i = 1; i < natoms; i++){
+		for (int j = 0; j < i; j++){
+			charge_prod[i*(i-1)/2+j] = ion_charges[i]*ion_charges[j];
+		}
 	}
 
 	// print_carcoor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "CONTCAR");
@@ -268,7 +283,7 @@ int main(int argc, char **argv){
 	double Lmin=min(boxcell[0][0],min(boxcell[1][1],boxcell[2][2]));
 	double beta=5.42/Lmin;
 	double cutoff = Lmin/2;
-	// cout<<","<<natoms;
+	
 	/*Self Energy*/
 	// double selfenergy=self(n_atomtype, natoms_type, chg, beta)*unitzer;
 	// cout<<fixed<<setprecision(5)<<"Self Energy: "<<selfenergy<<" Kcal/mol"<<"\n\n";
@@ -286,13 +301,12 @@ int main(int argc, char **argv){
 	/*Real Energy*/
 	chrono::time_point<std::chrono::system_clock> start2, end2;
 	start2 = chrono::system_clock::now();
-	double realenergy=real(PosIons, ion_charges, natoms, beta, boxcell,cutoff)*unitzer;
+	double realenergy=real(PosIons2, charge_prod, natoms, beta, boxcell,cutoff)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Real Energy: "<<realenergy<<" Kcal/mol"<<"\n";
 	end2 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds2 = end2 - start2;
     time_t end_time2 = std::chrono::system_clock::to_time_t(end2);
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds2.count() << " sec\n\n";
-	// cout<<fixed<<setprecision(8)<<","<<elapsed_seconds2.count();
 	
 	/*Reciprocal Energy (k!=0) using the integral method*/
 	// chrono::time_point<std::chrono::system_clock> start4, end4;
@@ -319,13 +333,12 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k==0)*/
 	chrono::time_point<std::chrono::system_clock> start6, end6;
 	start6 = chrono::system_clock::now();
-	double recienergy_0=reci0(PosIons, ion_charges, natoms, beta, boxcell)*unitzer;
+	double recienergy_0=reci0(PosIons2, charge_prod, natoms, beta, boxcell)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy (k==0): "<<recienergy_0<<" Kcal/mol"<<"\n";
 	end6 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds6 = end6- start6;
     time_t end_time6 = std::chrono::system_clock::to_time_t(end6);
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds6.count() << " sec\n\n";
-	// cout<<fixed<<setprecision(8)<<","<<elapsed_seconds6.count();
 
 	// cout<<fixed<<setprecision(8)<<","<<elapsed_seconds6.count() +  elapsed_seconds2.count();
 
@@ -333,15 +346,14 @@ int main(int argc, char **argv){
 	chrono::time_point<std::chrono::system_clock> start7, end7;
 	start7 = chrono::system_clock::now();
 	double energy0=0,energy1=0;
-	// realnreci0(PosIons, ion_charges, natoms, beta, boxcell,cutoff,energy0,energy1);
-	vector<double> energy = realnreci0(PosIons, ion_charges, natoms, beta, boxcell,cutoff);
+	vector<double> energy = realnreci0(PosIons2, charge_prod, natoms, beta, boxcell,cutoff);
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy (k==0): "<<energy[1]*unitzer<<" Kcal/mol"<<"\n";
 	cout<<fixed<<setprecision(15)<<"Real Energy : "<<energy[0]*unitzer<<" Kcal/mol"<<"\n";
 	end7 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds7 = end7- start7;
     time_t end_time7 = std::chrono::system_clock::to_time_t(end7);
-	// cout<<fixed<<setprecision(8)<<","<<elapsed_seconds7.count();
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds7.count() << " sec\n\n";
+
 	// delete dynamic variables 
 	for(i=0;i<3;i++){
 		delete [] boxcell[i]; 
@@ -355,6 +367,7 @@ int main(int argc, char **argv){
 	}
 
 	delete [] PosIons;
+	delete [] PosIons2;
 	delete [] boxcell;
 	delete [] atomtype;
 	delete [] natoms_type;
@@ -362,6 +375,8 @@ int main(int argc, char **argv){
 	delete [] vel;
 	delete [] fixatoms;
     delete [] chg;
+    delete [] ion_charges;
+    delete [] charge_prod;
 
 	return 0;
 }
