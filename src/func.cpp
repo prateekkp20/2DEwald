@@ -22,6 +22,7 @@ void crossProduct(T1 v_A, T1 v_B, double *out){
    out[2] = v_A[0] * v_B[1] - v_A[1] * v_B[0];
 }
 template void crossProduct<float*>(float*, float*, double*);
+template void crossProduct<double*>(double*, double*, double*);
 
 double F_0(double val){
     val=fabs(val); //making the input positive
@@ -41,7 +42,7 @@ double F_0_New(double DelZ, double DelZ2, double beta){
     return a-b;
 }
 
-double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, float **box){
+double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, double **box){
     if(!same_r){
         double delX=ri[0]-rj[0];
         double delY=ri[1]-rj[1];

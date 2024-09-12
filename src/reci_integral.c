@@ -7,10 +7,10 @@
 
 struct reciprocal_n_params{
   double** PosIons;
-  float* ion_charges;
+  double* ion_charges;
   int natoms;
   double betaa;
-  float** box;
+  double** box;
   int K;
 };
 
@@ -18,10 +18,10 @@ double integrand_reciprocal(double h, void *params){
     // this integral is over the variable h;
     reciprocal_n_params* p = (struct reciprocal_n_params*)params;
     double **PosIons = p->PosIons;
-    float *ion_charges = p->ion_charges;
+    double *ion_charges = p->ion_charges;
     int natoms = p->natoms;
     double betaa = p->betaa;
-    float **box = p->box;
+    double **box = p->box;
     int K = p->K;
 
     double reciprocal_energy_i=0;
@@ -52,7 +52,7 @@ double integrand_reciprocal(double h, void *params){
     return reciprocal_energy_i;
 }
 
-double reciprocal_kawata(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K) {
+double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K) {
     // this is for Ui
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(100);
 

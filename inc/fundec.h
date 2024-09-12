@@ -1,10 +1,10 @@
 ///declare all functions here
 
-void print_lammps_input_file(double **PosIons, float *chg, int natoms, float **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename);
+void print_lammps_input_file(double **PosIons, float *chg, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename);
 
-void print_coor(double **PosIons, int natoms, float **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
+void print_coor(double **PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
 
-void print_carcoor(double **PosIons, int natoms, float **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
+void print_carcoor(double **PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
 
 void printCoor(double **PosIons, int natoms, string *type);
 
@@ -12,34 +12,29 @@ void printFor(double **ForceIons, int natoms, string *type);
 
 void printVel(double **Vel, int natoms, string *type);
 
-void printprobVel(double **vel, int natoms, float *mass, float Temp);
+void printprobVel(double **vel, int natoms, double *mass, float Temp);
 
-double self(int n_atomtype, int *natoms_type, float *chargs, float betaa);
+double self(int n_atomtype, int *natoms_type, float *chargs, double betaa);
 
-double real(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff);
+double real(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box, double cutoff);
 
 double F_0(double val);
 
 double F_0_New(double DelZ, double DelZ2, double beta);
 
-double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, float **box);
+double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, double **box);
 
-double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K);
+double reciprocal_n2(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K);
 
-double reciprocal_kawata(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K);
+double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K);
 
 double integrand_reciprocal(double h, void *params);
 
-double reci0(double **PosIons, float *ion_charges, int natoms, double betaa, float **box);
+double reci0(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box);
 
-vector<double> realnreci0(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff);
+vector<double> realnreci0(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box, double cutoff);
 
-void realnreci01(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff, double &energy0, double &energy1);
-
-double dist(double **PosIons, int atom1, int atom2, float **box);
-
-// void distWithZ(double **PosIons, int atom1, int atom2, float **box, vector<double> &out);
-void distWithZ(double **PosIons, int atom1, int atom2, float **box, double &modR, double &Z, double &Z2);
+double dist(double *PosIons2, int atom1, int atom2, double **box);
 
 template<typename T>
 double dotProduct(T v1, T v2, size_t n) ;
@@ -61,6 +56,6 @@ double reciprocal_fft_integrand(double h, void *params);
 
 double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
 
-double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
+double reciprocal_pppm(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
 
-double reciprocal_pppm_chebyshev(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
+double reciprocal_pppm_chebyshev(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);

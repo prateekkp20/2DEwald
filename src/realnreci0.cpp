@@ -4,7 +4,7 @@
 
 #define ENABLE_OMP 1
 
-vector<double> realnreci0(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff){
+vector<double> realnreci0(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box, double cutoff){
     // This term will contain the real energy part as energy[0] and reciprocal energy k=0 as energy[1]
     vector<double> energy(2,0);
     double energy0=0,energy1=0;
@@ -13,21 +13,16 @@ vector<double> realnreci0(double **PosIons, float *ion_charges, int natoms, doub
         omp_set_num_threads(thread::hardware_concurrency());
         #pragma omp parallel for simd schedule(runtime) reduction(+: energy0,energy1)
     #endif
-    for (int i = 0; i < natoms; i++){
+    for (int i = 1; i < natoms; i++){
         for (int j = 0; j < i; j++){
 
             // real energy
-            double modR=dist(PosIons,i,j,box);
-            if(modR<=cutoff){
-                double val = betaa*modR;
-                double exp_x2 = exp(-val*val);
-                double t, t1 =  t  = 1/(1+0.3275911*val);
-                double erfcx = exp_x2*(0.254829592*t - 0.284496736*(t*=t1) + 1.421413741*(t*=t1) - 1.453152027*(t*=t1) + 1.061405429*(t*=t1));
-                energy0+=(ion_charges[i]*ion_charges[j]*erfcx)/modR;
-            }
+            double modR=dist(PosIons2,i,j,box);
+            if(modR<=cutoff)
+                energy0+=(charge_prod[i*(i-1)/2+j]*erfc(betaa*modR))/modR;
             
             // reciprocal energy k=0
-            energy1+=ion_charges[i]*ion_charges[j]*F_0((PosIons[i][2]-PosIons[j][2])*betaa);
+            energy1+=charge_prod[i*(i-1)/2+j]*F_0((PosIons2[i*3+2]-PosIons2[j*3+2])*betaa);
         }
     }
     energy1*=2*sqrt(M_PI)/(betaa*Length[0]*Length[1]);

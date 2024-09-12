@@ -2,11 +2,10 @@
 #include "const.h"
 #include "fundec.h"
 
-// #define ENABLE_OMP 1
+#define ENABLE_OMP 1
 
-double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K){
+double reciprocal_n2(double **PosIons, double *charge_prod, double *ion_charges, int natoms, double betaa, double **box, int K){
     double reciprocal_energy_i=0;
-
     #if defined ENABLE_OMP
         omp_set_num_threads(thread::hardware_concurrency());
     #endif
@@ -26,7 +25,7 @@ double reciprocal_n2(double **PosIons, float *ion_charges, int natoms, double be
             // (1)
             for (int i = 0; i < natoms; i++){
                 for (int j = 0; j < i; j++){
-                    reciprocal_energy_i+=2*ion_charges[i]*ion_charges[j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false,box);
+                    reciprocal_energy_i+=2*charge_prod[i*(i-1)/2+j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false,box);
                 }
             }
 
