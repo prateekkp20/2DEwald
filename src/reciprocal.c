@@ -25,7 +25,8 @@ double reciprocal_n2(double **PosIons, double *charge_prod, double *ion_charges,
             // (1)
             for (int i = 0; i < natoms; i++){
                 for (int j = 0; j < i; j++){
-                    reciprocal_energy_i+=2*charge_prod[i*(i-1)/2+j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false,box);
+                    // reciprocal_energy_i+=2*charge_prod[i*(i-1)/2+j]*F_kl(PosIons[i],PosIons[j],sigma,psi,betaa,false,box);
+                    reciprocal_energy_i+=2*charge_prod[i*(i-1)/2+j]*F_kl_I(PosIons[i],PosIons[j],sigma,psi,betaa,box);
                 }
             }
 
@@ -34,7 +35,8 @@ double reciprocal_n2(double **PosIons, double *charge_prod, double *ion_charges,
             #endif
             // (2)
             for (int i = 0; i < natoms; i++){
-                reciprocal_energy_i+=ion_charges[i]*ion_charges[i]*F_kl(PosIons[i],PosIons[i],sigma,psi,betaa,true,box);
+                reciprocal_energy_i+=ion_charges[i]*ion_charges[i]*F_kl_0(sigma,psi,betaa);
+                // reciprocal_energy_i+=ion_charges[i]*ion_charges[i]*F_kl(PosIons[i],PosIons[i],sigma,psi,betaa,true,box);
             }
         }
     }
