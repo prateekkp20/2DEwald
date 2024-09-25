@@ -24,7 +24,7 @@ double F_0_New(double DelZ, double DelZ2, double beta);
 
 double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, double **box);
 
-double reciprocal_n2(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K);
+double reciprocal_n2(double **PosIons, double *charge_prod,  double *ion_charges, int natoms, double betaa, double **box, int K);
 
 double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K);
 
@@ -52,9 +52,14 @@ double error(T2 a, T2 b);
 template<typename T3>
 double percentReduction(T3 newValue, T3 oldValue);
 
-double reciprocal_fft_integrand(double h, void *params);
+template<typename T4>
+T4* linspace(T4 a, T4 b, T4 num);
 
-double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
+double reciprocal_fastft_integrand(double h, void *params);
+
+double reciprocal_ft_integrand(double h, void *params);
+
+double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n);
 
 double reciprocal_pppm(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
 

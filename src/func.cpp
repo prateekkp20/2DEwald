@@ -61,6 +61,23 @@ double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool 
     return 0;
 }
 
+double F_kl_0(double sigma, double psi, double beta){
+    double norm_sigma_psi=2*M_PI*sqrt(sigma*sigma+psi*psi);
+    return (2/norm_sigma_psi)*erfc(norm_sigma_psi/(2*beta));
+}
+
+double F_kl_I(double *ri, double *rj, double sigma, double psi, double beta, double **box){
+    double delX=ri[0]-rj[0];
+    double delY=ri[1]-rj[1];
+    double delZ=ri[2]-rj[2];
+    sigma*=2*M_PI;
+    psi*=2*M_PI;
+    double norm_sigma_psi=sqrt(sigma*sigma+psi*psi);
+    double a = cos(sigma*delX+psi*delY)/norm_sigma_psi;
+    double b = exp(delZ*norm_sigma_psi)*erfc(beta*delZ+(norm_sigma_psi/(2*beta)))+exp(-delZ*norm_sigma_psi)*erfc(-beta*delZ+(norm_sigma_psi/(2*beta)));
+    return a*b;
+}
+
 double M_n(double u, int n){
     if(n<2)return 0;
     else if(n==2){
@@ -101,3 +118,12 @@ double percentReduction(T3 newValue, T3 oldValue){
 }
 template double percentReduction<double>(double, double);
 
+template<typename T4>
+T4* linspace(T4 a, T4 b, T4 num){
+    T4 * line  = new T4[b-a+1];
+    for (int i = 0; i < b-a+1; i++){
+        line[i] = a+i;
+    }
+    return line;
+}
+template int* linspace(int,int,int);
