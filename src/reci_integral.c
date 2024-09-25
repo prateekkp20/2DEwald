@@ -29,6 +29,7 @@ double integrand_reciprocal(double h, void *params){
     double reciprocal_energy_i=0;
 
     complex<double> t(0,1);
+    double G[3]={2*M_PI/Length[0], 2*M_PI/Length[1], h};
     #if defined ENABLE_OMP
         #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
     #endif
@@ -37,14 +38,13 @@ double integrand_reciprocal(double h, void *params){
         for (int l = -K; l < K+1; l++){
             if((k==0) && (l==0))continue;
             complex<double> s_kh=0;
-            double G[3]={2*M_PI*k/Length[0], 2*M_PI*l/Length[1], h};
             for (int  i = 0; i < natoms; i++){
-                double G_dot_r=G[0]*PosIons[i][0]+G[1]*PosIons[i][1]+G[2]*PosIons[i][2];
+                double G_dot_r=k*G[0]*PosIons[i][0]+l*G[1]*PosIons[i][1]+G[2]*PosIons[i][2];
                 complex<double> charge(ion_charges[i],0.0);
                 s_kh+=charge*(cos(G_dot_r)+t*sin(G_dot_r));
             }
             double norm_sg = norm(s_kh);
-            double norm_g = G[0]*G[0]+G[1]*G[1]+G[2]*G[2];
+            double norm_g = k*k*G[0]*G[0]+l*l*G[1]*G[1]+G[2]*G[2];
             reciprocal_energy_i+=norm_sg/(norm_g*exp(norm_g/(4*betaa*betaa)));
         }
     }
