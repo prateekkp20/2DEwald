@@ -21,11 +21,22 @@ struct reciprocal_n_params {
   double **G;
 };
 
-complex<double> func(int mx, int my, double h){
+complex<double> func(int mx, int my, double h,double **x_direc,double **y_direc,double **z_direc, int Grid, int * TZ, int GridZ, double *ion_charges, int natoms){
     complex<double> S;
-
+    double two_pi_mx=2*M_PI*mx,two_pi_my=2*M_PI*my;
     for (int i = 0; i < natoms; i++){
-        
+        complex<double> X,Y,Z;
+        for (int tx = 0; tx < Grid; tx++){
+            X+=x_direc[i][tx]*exp((two_pi_mx)/Grid*t);
+        }
+        for (int ty = 0; ty < Grid; ty++){
+            Y+=y_direc[i][ty]*exp((two_pi_my)/Grid*t);
+        }
+        for (int  tz = 0; tz < GridZ; tz++){
+            Z+=z_direc[i][tz]*exp(h*TZ[tz]*t);
+        }
+        const complex<double> charge(ion_charges[i],0);
+        S+=X*Y*Z*charge;
     }
     
     return S;
@@ -98,7 +109,6 @@ double reciprocal_ft_integrand(double h, void *params){
     }
 
     // calculating the fourier transforms of the Q Matrix
-    int * M = new int [2*K+1];
 
     long double reciprocal_energy_i=0;
     int ii,jj,kk;
@@ -115,9 +125,9 @@ double reciprocal_ft_integrand(double h, void *params){
             int temp = ii * Grid + jj;
 
             double factor = FourPiPi * (i*i/(box[0][0]*box[0][0])+j*j/(box[1][1]*box[1][1])) + h*h;
-            // long double norm_FQ = norm(func(i,j,h,x_direc,y_direc,z_direc,Grid,TZ,GridZ,ion_charges,natoms));
+            long double norm_F = norm(func(i,j,h,x_direc,y_direc,z_direc,Grid,TZ,GridZ,ion_charges,natoms));
             long double norm_FQ = 0.001;
-            reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Grid*i,5)*Coeff(TwoPi_Grid*j,5)*Coeff(h,4)) / (factor*exp(log(exp(factor/deno))));
+            reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n)) / (factor*exp(factor/deno));
         }
     }
     return reciprocal_energy_i;
