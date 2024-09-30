@@ -20,8 +20,6 @@ double real(double *PosIons2, double *charge_prod, int natoms, double betaa, dou
 
 double F_0(double val);
 
-double F_0_New(double DelZ, double DelZ2, double beta);
-
 double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, double **box);
 
 double F_kl_I(double *ri, double *rj, double sigma, double psi, double beta, double **box);

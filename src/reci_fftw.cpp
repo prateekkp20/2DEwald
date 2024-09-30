@@ -1,3 +1,4 @@
+// this code implements the reciprocal (k!=0) energy using the bspline method with 2D Fourier Transform and 1D Fourier Integral
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
@@ -52,7 +53,8 @@ double reciprocal_ft_integrand(double h, void *params){
     int K = p->K;
     int Grid = p->Grid;
     // n: order of b-spline interpolation
-    int n = p->n;
+    int n = 14;
+    // int n = p->n;
     double *Length = p->Length;
     auto G = p->G;
 
@@ -84,7 +86,7 @@ double reciprocal_ft_integrand(double h, void *params){
     int * TZ = linspace(-n,(int)Length[2],1);
     // maximum coordinate along the z axis
     // double ZCoord_max = 0;
-    int l_max=2;
+    int l_max=1;
     #pragma omp parallel for simd
     // Calculating the cofficients in the x,y and z directions for the Q Matrix
     for (int i = 0; i < natoms; i++){
@@ -92,42 +94,33 @@ double reciprocal_ft_integrand(double h, void *params){
         for (int  tx = 0; tx < Grid; tx++){
             x_direc[i][tx]=0;
             for (int  lx = -l_max; lx < l_max+1; lx++){
-                x_direc[i][tx]+=M_n(u[i][0]-tx-lx*K,14);
+                x_direc[i][tx]+=M_n(u[i][0]-tx-lx*Grid,14);
             }
         }
         // for Y direction
         for (int  ty = 0; ty < Grid; ty++){
             y_direc[i][ty]=0;
             for (int  ly = -l_max; ly < l_max+1; ly++){
-                y_direc[i][ty]+=M_n(u[i][1]-ty-ly*K,14);
+                y_direc[i][ty]+=M_n(u[i][1]-ty-ly*Grid,14);
             }
         }
         // for Z direction
         for (int  tz = 0; tz < GridZ; tz++){
-            z_direc[i][tz]=M_n(PosIons[i][2]-TZ[tz],4);
+            z_direc[i][tz]=M_n(PosIons[i][2]-TZ[tz],14);
         }
     }
 
-    // calculating the fourier transforms of the Q Matrix
-
     long double reciprocal_energy_i=0;
-    int ii,jj,kk;
     double deno = 4*betaa*betaa;
     double FourPiPi = 4*M_PI*M_PI;
     double TwoPi_Grid = 2*M_PI/Grid;
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
             if(i==0&&j==0)continue;
-            if(i<0) ii=Grid+i;
-            else ii=i;
-            if(j<0) jj=Grid+j;
-            else  jj=j;
-            int temp = ii * Grid + jj;
-
             double factor = FourPiPi * (i*i/(box[0][0]*box[0][0])+j*j/(box[1][1]*box[1][1])) + h*h;
             long double norm_F = norm(func(i,j,h,x_direc,y_direc,z_direc,Grid,TZ,GridZ,ion_charges,natoms));
             long double norm_FQ = 0.001;
-            reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n)) / (factor*exp(factor/deno));
+            reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,14)*Coeff(TwoPi_Grid*j,14)*Coeff(h,14)) / (factor*exp(factor/deno));
         }
     }
     return reciprocal_energy_i;
