@@ -32,10 +32,10 @@ complex<double> func(int mx, int my, double h,double **x_direc,double **y_direc,
     for (int i = 0; i < natoms; i++){
         complex<double> X,Y,Z;
         for (int tx = 0; tx < Grid; tx++){
-            X+=x_direc[i][tx]*exp((two_pi_mx)/Grid*t);
+            X+=x_direc[i][tx]*exp((two_pi_mx*tx)/Grid*t);
         }
         for (int ty = 0; ty < Grid; ty++){
-            Y+=y_direc[i][ty]*exp((two_pi_my)/Grid*t);
+            Y+=y_direc[i][ty]*exp((two_pi_my*ty)/Grid*t);
         }
         for (int  tz = 0; tz < GridZ; tz++){
             Z+=z_direc[i][tz]*exp(h*TZ[tz]*t);
@@ -93,7 +93,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     double C[3]={box[2][0],box[2][1],box[2][2]};
     crossProduct(box[0],box[1],A);
     double volume = dotProduct(A,C,3);
-    int nz = 14;
+    int nz = 8;
     // Calculating the reciprocal vectors
     double **G;
     G= new double * [3];
