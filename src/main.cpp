@@ -308,11 +308,11 @@ int main(int argc, char **argv){
     // time_t end_time2 = std::chrono::system_clock::to_time_t(end2);
 	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds2.count() << " sec\n\n";
 
-	/*Reciprocal Energy (k!=0) using the 2D FFT method*/
+	/*Reciprocal Energy (k!=0) using the 2D FT and 1D FI method*/
 	chrono::time_point<std::chrono::system_clock> start3, end3;
 	start3 = chrono::system_clock::now();
-	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6, 64 ,6)*unitzer;
-	cout<<fixed<<setprecision(15)<<"Reciprocal Energy FFT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
+	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6, 64 ,8)*unitzer;
+	cout<<fixed<<setprecision(15)<<"Reciprocal Energy FT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
 	end3 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds3 = end3 - start3;
     time_t end_time3 = std::chrono::system_clock::to_time_t(end3);
