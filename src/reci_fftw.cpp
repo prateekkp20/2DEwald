@@ -20,6 +20,10 @@ struct reciprocal_n_params {
   int n;
   double* Length;
   double **G;
+  double **x_direc, **y_direc, **z_direc;
+  int * TZ ;
+  int GridZ;
+
 };
 
 complex<double> func(int mx, int my, double h,double **x_direc,double **y_direc,double **z_direc, int Grid, int * TZ, int GridZ, double *ion_charges, int natoms){
@@ -53,74 +57,26 @@ double reciprocal_ft_integrand(double h, void *params){
     int K = p->K;
     int Grid = p->Grid;
     // n: order of b-spline interpolation
-    int n = 14;
-    // int n = p->n;
+    int n = p->n;
     double *Length = p->Length;
     auto G = p->G;
-
-    omp_set_num_threads(thread::hardware_concurrency());
-    // initializing the new variables
-
-    // u: the fractional coordinates in x and y directions
-    // x_direc, y_direc, z_direc: the cofficients in the x,y and z directions for the Q Matrix
-    int GridZ = Length[2]+n+1;
-    double **u,**x_direc, **y_direc, **z_direc;
-    u= new double * [natoms];
-    x_direc = new double * [natoms];
-    y_direc = new double * [natoms];
-    z_direc = new double * [natoms]; 
-    for (int  i = 0; i < natoms; i++){
-        u[i] = new double  [2]; // We only need these in x and y direction 
-        x_direc[i] = new double  [Grid];
-        y_direc[i] = new double  [Grid];
-        z_direc[i] = new double  [GridZ]; // tz varies from -n to Zmax(Lz)
-    }
-
-    #pragma omp parallel for simd
-    // Calculating the fractional coordinates in x and y directions
-    for (int i = 0; i < natoms; i++){
-        for (int j = 0; j < 2; j++){
-            u[i][j]=Grid*dotProduct(PosIons[i],G[j],3);
-        }
-    }
-    int * TZ = linspace(-n,(int)Length[2],1);
-    // maximum coordinate along the z axis
-    // double ZCoord_max = 0;
-    int l_max=1;
-    #pragma omp parallel for simd
-    // Calculating the cofficients in the x,y and z directions for the Q Matrix
-    for (int i = 0; i < natoms; i++){
-        // for X direction
-        for (int  tx = 0; tx < Grid; tx++){
-            x_direc[i][tx]=0;
-            for (int  lx = -l_max; lx < l_max+1; lx++){
-                x_direc[i][tx]+=M_n(u[i][0]-tx-lx*Grid,14);
-            }
-        }
-        // for Y direction
-        for (int  ty = 0; ty < Grid; ty++){
-            y_direc[i][ty]=0;
-            for (int  ly = -l_max; ly < l_max+1; ly++){
-                y_direc[i][ty]+=M_n(u[i][1]-ty-ly*Grid,14);
-            }
-        }
-        // for Z direction
-        for (int  tz = 0; tz < GridZ; tz++){
-            z_direc[i][tz]=M_n(PosIons[i][2]-TZ[tz],14);
-        }
-    }
+    auto x_direc=p->x_direc,y_direc=p->y_direc,z_direc=p->z_direc;
+    int *TZ=p->TZ;
+    int GridZ = p->GridZ;
 
     long double reciprocal_energy_i=0;
     double deno = 4*betaa*betaa;
     double FourPiPi = 4*M_PI*M_PI;
     double TwoPi_Grid = 2*M_PI/Grid;
+
+    #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
             if(i==0&&j==0)continue;
             double factor = FourPiPi * (i*i/(box[0][0]*box[0][0])+j*j/(box[1][1]*box[1][1])) + h*h;
             long double norm_F = norm(func(i,j,h,x_direc,y_direc,z_direc,Grid,TZ,GridZ,ion_charges,natoms));
             long double norm_FQ = 0.001;
-            reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,14)*Coeff(TwoPi_Grid*j,14)*Coeff(h,14)) / (factor*exp(factor/deno));
+            reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,8)) / (factor*exp(factor/deno));
         }
     }
     return reciprocal_energy_i;
@@ -128,7 +84,7 @@ double reciprocal_ft_integrand(double h, void *params){
 
 double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n){
     // this is for Ui
-
+    omp_set_num_threads(thread::hardware_concurrency());
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 
@@ -137,7 +93,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     double C[3]={box[2][0],box[2][1],box[2][2]};
     crossProduct(box[0],box[1],A);
     double volume = dotProduct(A,C,3);
-
+    int nz = 14;
     // Calculating the reciprocal vectors
     double **G;
     G= new double * [3];
@@ -150,13 +106,60 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     for (int x = 0; x < 3; x++)
         for (int q = 0; q < 3; q++)
             G[x][q] /= volume;
+    // initializing the new variables
 
+    // u: the fractional coordinates in x and y directions
+    // x_direc, y_direc, z_direc: the cofficients in the x,y and z directions for the Q Matrix
+    int GridZ = Length[2]+nz+1;
+    double **u,**x_direc, **y_direc, **z_direc;
+    u= new double * [natoms];
+    x_direc = new double * [natoms];
+    y_direc = new double * [natoms];
+    z_direc = new double * [natoms]; 
+    for (int  i = 0; i < natoms; i++){
+        u[i] = new double  [2]; // We only need these in x and y direction 
+        x_direc[i] = new double  [Grid];
+        y_direc[i] = new double  [Grid];
+        z_direc[i] = new double  [GridZ]; // tz varies from -n to Zmax(Lz)
+    }
+
+    #pragma omp parallel for schedule(runtime)
+    // Calculating the fractional coordinates in x and y directions
+    for (int i = 0; i < natoms; i++){
+        for (int j = 0; j < 2; j++){
+            u[i][j]=Grid*dotProduct(PosIons[i],G[j],3);
+        }
+    }
+    int * TZ = linspace(-nz,(int)Length[2],1);
+    int l_max=1;
+    #pragma omp parallel for schedule(runtime)
+    // Calculating the cofficients in the x,y and z directions for the Q Matrix
+    for (int i = 0; i < natoms; i++){
+        // for X direction
+        for (int  tx = 0; tx < Grid; tx++){
+            x_direc[i][tx]=0;
+            for (int  lx = -l_max; lx < l_max+1; lx++){
+                x_direc[i][tx]+=M_n(u[i][0]-tx-lx*Grid,n);
+            }
+        }
+        // for Y direction
+        for (int  ty = 0; ty < Grid; ty++){
+            y_direc[i][ty]=0;
+            for (int  ly = -l_max; ly < l_max+1; ly++){
+                y_direc[i][ty]+=M_n(u[i][1]-ty-ly*Grid,n);
+            }
+        }
+        // for Z direction
+        for (int  tz = 0; tz < GridZ; tz++){
+            z_direc[i][tz]=M_n(PosIons[i][2]-TZ[tz],nz);
+        }
+    }
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(100);
     // gsl_integration_romberg_workspace *workspace = gsl_integration_romberg_alloc(12);
 
     gsl_function F;
     F.function = &reciprocal_ft_integrand; // Set the function to integrate
-    reciprocal_n_params params = {PosIons, ion_charges, natoms, betaa, box, K, Grid, n, Length, G};
+    reciprocal_n_params params = {PosIons, ion_charges, natoms, betaa, box, K, Grid, n, Length, G,x_direc,y_direc,z_direc, TZ, GridZ};
     F.params = &params;
     double result, error;
     size_t size = 12;
