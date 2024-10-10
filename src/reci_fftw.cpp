@@ -10,20 +10,19 @@ const complex<double> t(0.0,1.0);
 #define ENABLE_OMP 1
 
 struct reciprocal_n_params {
-  double** PosIons;
-  double* ion_charges;
-  int natoms;
-  double betaa;
-  double** box;
-  int K;
-  int Grid;
-  int n;
-  double* Length;
-  double **G;
-  double **x_direc, **y_direc, **z_direc;
-  int * TZ ;
-  int GridZ;
-
+    double** PosIons;
+    double* ion_charges;
+    int natoms;
+    double betaa;
+    double** box;
+    int K;
+    int Grid;
+    int n;
+    double* Length;
+    double **G;
+    double **x_direc, **y_direc, **z_direc;
+    int * TZ ;
+    int GridZ;
 };
 
 complex<double> func(int mx, int my, double h,double **x_direc,double **y_direc,double **z_direc, int Grid, int * TZ, int GridZ, double *ion_charges, int natoms){
@@ -40,10 +39,8 @@ complex<double> func(int mx, int my, double h,double **x_direc,double **y_direc,
         for (int  tz = 0; tz < GridZ; tz++){
             Z+=z_direc[i][tz]*exp(h*TZ[tz]*t);
         }
-        const complex<double> charge(ion_charges[i],0);
-        S+=X*Y*Z*charge;
+        S+=X*Y*Z*ion_charges[i];
     }
-    
     return S;
 }
 
@@ -75,7 +72,6 @@ double reciprocal_ft_integrand(double h, void *params){
             if(i==0&&j==0)continue;
             double factor = FourPiPi * (i*i/(box[0][0]*box[0][0])+j*j/(box[1][1]*box[1][1])) + h*h;
             long double norm_F = norm(func(i,j,h,x_direc,y_direc,z_direc,Grid,TZ,GridZ,ion_charges,natoms));
-            long double norm_FQ = 0.001;
             reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,8)) / (factor*exp(factor/deno));
         }
     }

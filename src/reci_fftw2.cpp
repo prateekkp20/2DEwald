@@ -28,13 +28,18 @@ struct reciprocal_n_params {
 complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_direc, double *ion_charges, int natoms, complex<double>* fz_i_h){
     complex<double> S;
     double two_pi_mx=2*M_PI*mx,two_pi_my=2*M_PI*my;
-    for (int tx = 0; tx < Grid; tx++){
+    for(int tx = 0; tx < Grid; tx++){
+        complex<double> Sx=0;
         for (int ty = 0; ty < Grid; ty++){
+            complex<double> Sy=0;
             for (int i = 0; i < natoms; i++){
-                S+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i]*exp((two_pi_mx*tx)/Grid*t)*exp((two_pi_my*ty)/Grid*t);
+                Sy+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
             }
+            Sx+=Sy*exp((two_pi_my*ty)/Grid*t);
         }
+        S+=Sx*exp((two_pi_mx*tx)/Grid*t);
     }
+
     return S;
 }
 
@@ -62,13 +67,14 @@ double reciprocal_ft_integrand(double h, void *params){
 
     // the fourier integral of z_direc vector for every ith atom
     complex<double>* fz_i_h = new complex<double> [natoms];
+
+    // #pragma omp parallel for schedule(runtime)
     for (int  i = 0; i < natoms; i++){
         for (int  tz = 0; tz < GridZ; tz++){
             fz_i_h[i]+=z_direc[i][tz]*exp(h*TZ[tz]*t);
         }
     }
 
-    // complex<double> * in = new complex<double> [Grid*Grid];
     fftw_complex *in;
     fftw_complex *out;
 
@@ -78,12 +84,7 @@ double reciprocal_ft_integrand(double h, void *params){
     fftw_plan plan;
     plan = fftw_plan_dft_2d(Grid, Grid, in ,out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
-    // for (int tx = 0; tx < Grid; tx++){
-    //     for (int ty = 0; ty < Grid; ty++){
-    //         in[Grid*tx+ty]=0;
-    //     }
-    // }
-
+    // #pragma omp parallel for schedule(runtime)
     for (int i = 0; i < natoms; i++){
         for (int tx = 0; tx < Grid; tx++){
             if(x_direc[i][tx]==0)continue;
@@ -110,9 +111,10 @@ double reciprocal_ft_integrand(double h, void *params){
             else jj=j;
             int temp = Grid*ii+jj;
             double factor = FourPiPi * (i*i/(box[0][0]*box[0][0])+j*j/(box[1][1]*box[1][1])) + h*h;
-            long double norm_F = norm(func2(i, j, Grid, x_direc,y_direc,ion_charges,natoms,fz_i_h));
-            // long double norm_F = out[temp][0]*out[temp][0] + out[temp][1]*out[temp][1];
-            reciprocal_energy_i+= norm_F  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,8)) / (factor*exp(factor/deno));
+
+            // double norm_F = norm(func2(i, j, Grid, x_direc,y_direc,ion_charges,natoms,fz_i_h));
+            double norm_FQ = norm(out[temp][0] + t*out[temp][1]);
+            reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,8)) / (factor*exp(factor/deno));
         }
     }
     return reciprocal_energy_i;
@@ -191,7 +193,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     }
     
     // gsl_set_error_handler_off();
-    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(100);
+    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(200);
     // gsl_integration_romberg_workspace *workspace = gsl_integration_romberg_alloc(12);
 
     gsl_function F;
@@ -201,7 +203,8 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     double result, error;
     size_t size = 12;
     // gsl_integration_romberg(&F,-10,10, 1e-7, 1e-2, &result, &size, workspace);
-    gsl_integration_qagi(&F, 1e-4, 1e-2, 100, workspace, &result, &error);
+    // gsl_integration_qag(&F, -100, 100, 1e-4, 1e-2, 100, GSL_INTEG_GAUSS21, workspace, &result, &error);
+    gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
     // gsl_integration_romberg_free(workspace); // Free workspace memory
     gsl_integration_workspace_free(workspace); // Free workspace memory
     
