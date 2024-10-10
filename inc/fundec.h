@@ -66,3 +66,9 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
 double reciprocal_pppm(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
 
 double reciprocal_pppm_chebyshev(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
+
+complex<double> StructureFactor(int mx, int my, double h, double **PosIons, double *ion_charges, int natoms, double **box, int Grid, int n);
+
+complex<double> StructureFactor2(int mx, int my, double h, double **PosIons, double *ion_charges, int natoms, double **box, int Grid, int n);
+
+complex<double> StructureFactor3(int mx, int my, double h, double **PosIons, double *ion_charges, int natoms, double **box, int Grid, int n);

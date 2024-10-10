@@ -289,14 +289,14 @@ int main(int argc, char **argv){
 	// cout<<fixed<<setprecision(5)<<"Self Energy: "<<selfenergy<<" Kcal/mol"<<"\n\n";
 
 	/*Reciprocal Energy (k!=0)*/
-	chrono::time_point<std::chrono::system_clock> start1, end1;
-	start1 = chrono::system_clock::now();
-	double recienergy=reciprocal_n2(PosIons, charge_prod, ion_charges, natoms, beta, boxcell,6)*unitzer;
-	cout<<fixed<<setprecision(15)<<"Reciprocal Energy: "<<recienergy<<" Kcal/mol"<<"\n";
-	end1 = chrono::system_clock::now();
-	chrono::duration<double> elapsed_seconds1 = end1- start1;
-    time_t end_time1 = std::chrono::system_clock::to_time_t(end1);
-	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds1.count() << " sec\n\n";
+	// chrono::time_point<std::chrono::system_clock> start1, end1;
+	// start1 = chrono::system_clock::now();
+	// double recienergy=reciprocal_n2(PosIons, charge_prod, ion_charges, natoms, beta, boxcell,6)*unitzer;
+	// cout<<fixed<<setprecision(15)<<"Reciprocal Energy: "<<recienergy<<" Kcal/mol"<<"\n";
+	// end1 = chrono::system_clock::now();
+	// chrono::duration<double> elapsed_seconds1 = end1- start1;
+    // time_t end_time1 = std::chrono::system_clock::to_time_t(end1);
+	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds1.count() << " sec\n\n";
 
 	/*Real Energy*/
 	// chrono::time_point<std::chrono::system_clock> start2, end2;
@@ -311,7 +311,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the 2D FT and 1D FI method*/
 	chrono::time_point<std::chrono::system_clock> start3, end3;
 	start3 = chrono::system_clock::now();
-	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6, 64 ,8)*unitzer;
+	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6, 32 ,8)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy FT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
 	end3 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds3 = end3 - start3;
@@ -362,6 +362,11 @@ int main(int argc, char **argv){
 	// chrono::duration<double> elapsed_seconds7 = end7- start7;
     // time_t end_time7 = std::chrono::system_clock::to_time_t(end7);
 	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds7.count() << " sec\n\n";
+	int mx=4,my=-6;
+	double h = 0.012887;
+	cout<<fixed<<setprecision(8)<<StructureFactor(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
+	cout<<fixed<<setprecision(8)<<StructureFactor2(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
+	cout<<fixed<<setprecision(8)<<StructureFactor3(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
 
 	// delete dynamic variables 
 	for(i=0;i<3;i++){
