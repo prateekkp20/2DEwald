@@ -68,7 +68,6 @@ double reciprocal_ft_integrand(double h, void *params){
     // the fourier integral of z_direc vector for every ith atom
     complex<double>* fz_i_h = new complex<double> [natoms];
 
-    // #pragma omp parallel for schedule(runtime)
     for (int  i = 0; i < natoms; i++){
         for (int  tz = 0; tz < GridZ; tz++){
             fz_i_h[i]+=z_direc[i][tz]*exp(h*TZ[tz]*t);
@@ -84,7 +83,6 @@ double reciprocal_ft_integrand(double h, void *params){
     fftw_plan plan;
     plan = fftw_plan_dft_2d(Grid, Grid, in ,out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
-    // #pragma omp parallel for schedule(runtime)
     for (int i = 0; i < natoms; i++){
         for (int tx = 0; tx < Grid; tx++){
             if(x_direc[i][tx]==0)continue;
@@ -97,11 +95,10 @@ double reciprocal_ft_integrand(double h, void *params){
     }    
 
     fftw_execute(plan);
-    fftw_destroy_plan(plan);
-    fftw_cleanup();
+    // fftw_destroy_plan(plan);
+    // fftw_cleanup();
 
     int ii,jj;
-    #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
             if(i==0&&j==0)continue;
@@ -114,6 +111,9 @@ double reciprocal_ft_integrand(double h, void *params){
 
             // double norm_F = norm(func2(i, j, Grid, x_direc,y_direc,ion_charges,natoms,fz_i_h));
             double norm_FQ = norm(out[temp][0] + t*out[temp][1]);
+            // if(abs(norm_F-norm_FQ)>0.01){
+            //     cout<<norm_FQ<<" "<<norm_F<<" "<<out[temp][0] + t*out[temp][1]<<" "<<i<<" "<<j<<" "<<h<<"\n";
+            // }
             reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,8)) / (factor*exp(factor/deno));
         }
     }
@@ -122,7 +122,6 @@ double reciprocal_ft_integrand(double h, void *params){
 
 double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n){
     // this is for Ui
-    omp_set_num_threads(thread::hardware_concurrency());
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
     // Volume Calculations
@@ -153,6 +152,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     x_direc = new double * [natoms];
     y_direc = new double * [natoms];
     z_direc = new double * [natoms]; 
+
     for (int  i = 0; i < natoms; i++){
         u[i] = new double  [2]; // We only need these in x and y direction 
         x_direc[i] = new double  [Grid];
@@ -160,7 +160,6 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
         z_direc[i] = new double  [GridZ]; // tz varies from -n to Zmax(Lz)
     }
 
-    #pragma omp parallel for schedule(runtime)
     // Calculating the fractional coordinates in x and y directions
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 2; j++){
@@ -169,7 +168,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     }
     int * TZ = linspace(-nz,(int)Length[2],1);
     int l_max=1;
-    #pragma omp parallel for schedule(runtime)
+
     // Calculating the cofficients in the x,y and z directions for the Q Matrix
     for (int i = 0; i < natoms; i++){
         // for X direction
@@ -192,7 +191,6 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
         }
     }
     
-    // gsl_set_error_handler_off();
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(200);
     // gsl_integration_romberg_workspace *workspace = gsl_integration_romberg_alloc(12);
 
@@ -201,9 +199,9 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     reciprocal_n_params params = {PosIons, ion_charges, natoms, betaa, box, K, Grid, n, Length, G,x_direc,y_direc,z_direc, TZ, GridZ};
     F.params = &params;
     double result, error;
-    size_t size = 12;
+    // size_t size = 12;
     // gsl_integration_romberg(&F,-10,10, 1e-7, 1e-2, &result, &size, workspace);
-    // gsl_integration_qag(&F, -100, 100, 1e-4, 1e-2, 100, GSL_INTEG_GAUSS21, workspace, &result, &error);
+    // gsl_integration_qag(&F, -5, 5, 1e-4, 1e-2, 200, GSL_INTEG_GAUSS15, workspace, &result, &error);
     gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
     // gsl_integration_romberg_free(workspace); // Free workspace memory
     gsl_integration_workspace_free(workspace); // Free workspace memory
