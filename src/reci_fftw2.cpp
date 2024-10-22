@@ -7,8 +7,6 @@
 #define IMAG 1
 const complex<double> t(0.0,1.0);
 
-#define ENABLE_OMP 1
-
 struct reciprocal_n_params {
     double** PosIons;
     double* ion_charges;
@@ -67,7 +65,6 @@ double reciprocal_ft_integrand(double h, void *params){
 
     // the fourier integral of z_direc vector for every ith atom
     complex<double>* fz_i_h = new complex<double> [natoms];
-
     for (int  i = 0; i < natoms; i++){
         for (int  tz = 0; tz < GridZ; tz++){
             fz_i_h[i]+=z_direc[i][tz]*exp(h*TZ[tz]*t);
@@ -97,7 +94,6 @@ double reciprocal_ft_integrand(double h, void *params){
     fftw_execute(plan);
     // fftw_destroy_plan(plan);
     // fftw_cleanup();
-
     int ii,jj;
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
@@ -122,14 +118,19 @@ double reciprocal_ft_integrand(double h, void *params){
 
 double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n){
     // this is for Ui
+    #if defined ENABLE_OMP
+        omp_set_num_threads(thread::hardware_concurrency());
+    #endif
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
+
     // Volume Calculations
     double A[3];
     double C[3]={box[2][0],box[2][1],box[2][2]};
     crossProduct(box[0],box[1],A);
     double volume = dotProduct(A,C,3);
     int nz = 8;
+
     // Calculating the reciprocal vectors
     double **G;
     G= new double * [3];
@@ -142,8 +143,8 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     for (int x = 0; x < 3; x++)
         for (int q = 0; q < 3; q++)
             G[x][q] /= volume;
-    // initializing the new variables
 
+    // initializing the new variables
     // u: the fractional coordinates in x and y directions
     // x_direc, y_direc, z_direc: the cofficients in the x,y and z directions for the Q Matrix
     int GridZ = Length[2]+nz+1;
@@ -152,7 +153,6 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     x_direc = new double * [natoms];
     y_direc = new double * [natoms];
     z_direc = new double * [natoms]; 
-
     for (int  i = 0; i < natoms; i++){
         u[i] = new double  [2]; // We only need these in x and y direction 
         x_direc[i] = new double  [Grid];
@@ -192,19 +192,20 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     }
     
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(200);
-    // gsl_integration_romberg_workspace *workspace = gsl_integration_romberg_alloc(12);
-
     gsl_function F;
     F.function = &reciprocal_ft_integrand; // Set the function to integrate
     reciprocal_n_params params = {PosIons, ion_charges, natoms, betaa, box, K, Grid, n, Length, G,x_direc,y_direc,z_direc, TZ, GridZ};
     F.params = &params;
     double result, error;
+    gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
+    gsl_integration_workspace_free(workspace); // Free workspace memory
+
+    // gsl_integration_romberg_workspace *workspace = gsl_integration_romberg_alloc(12);
     // size_t size = 12;
     // gsl_integration_romberg(&F,-10,10, 1e-7, 1e-2, &result, &size, workspace);
-    // gsl_integration_qag(&F, -5, 5, 1e-4, 1e-2, 200, GSL_INTEG_GAUSS15, workspace, &result, &error);
-    gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
     // gsl_integration_romberg_free(workspace); // Free workspace memory
-    gsl_integration_workspace_free(workspace); // Free workspace memory
+    
+    // gsl_integration_qag(&F, -5, 5, 1e-4, 1e-2, 200, GSL_INTEG_GAUSS15, workspace, &result, &error);
     
     result*=1/(Length[0]*Length[1]);
     return result;
