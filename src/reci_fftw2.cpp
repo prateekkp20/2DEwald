@@ -23,24 +23,6 @@ struct reciprocal_n_params {
     int GridZ;
 };
 
-complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_direc, double *ion_charges, int natoms, complex<double>* fz_i_h){
-    complex<double> S;
-    double two_pi_mx=2*M_PI*mx,two_pi_my=2*M_PI*my;
-    for(int tx = 0; tx < Grid; tx++){
-        complex<double> Sx=0;
-        for (int ty = 0; ty < Grid; ty++){
-            complex<double> Sy=0;
-            for (int i = 0; i < natoms; i++){
-                Sy+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
-            }
-            Sx+=Sy*exp((two_pi_my*ty)/Grid*t);
-        }
-        S+=Sx*exp((two_pi_mx*tx)/Grid*t);
-    }
-
-    return S;
-}
-
 double reciprocal_ft_integrand(double h, void *params){
     reciprocal_n_params* p = (struct reciprocal_n_params*)params;
     double **PosIons = p->PosIons;
@@ -94,6 +76,7 @@ double reciprocal_ft_integrand(double h, void *params){
     fftw_execute(plan);
     // fftw_destroy_plan(plan);
     // fftw_cleanup();
+    
     int ii,jj;
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
@@ -104,23 +87,15 @@ double reciprocal_ft_integrand(double h, void *params){
             else jj=j;
             int temp = Grid*ii+jj;
             double factor = FourPiPi * (i*i/(box[0][0]*box[0][0])+j*j/(box[1][1]*box[1][1])) + h*h;
-
-            // double norm_F = norm(func2(i, j, Grid, x_direc,y_direc,ion_charges,natoms,fz_i_h));
             double norm_FQ = norm(out[temp][0] + t*out[temp][1]);
-            // if(abs(norm_F-norm_FQ)>0.01){
-            //     cout<<norm_FQ<<" "<<norm_F<<" "<<out[temp][0] + t*out[temp][1]<<" "<<i<<" "<<j<<" "<<h<<"\n";
-            // }
             reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,8)) / (factor*exp(factor/deno));
         }
     }
     return reciprocal_energy_i;
 }
 
+// Main Function to Calculate the Reciprocal Energy (k!=0)
 double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n){
-    // this is for Ui
-    #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
-    #endif
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 
