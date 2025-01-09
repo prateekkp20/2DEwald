@@ -112,12 +112,32 @@ double percentReduction(T3 newValue, T3 oldValue){
 }
 template double percentReduction<double>(double, double);
 
-template<typename T4>
-T4* linspace(T4 a, T4 b, T4 num){
-    T4 * line  = new T4[b-a+1];
+// template<typename T4>
+double* linspace(int a, int b, int num){
+    double * line  = new double[b-a+1];
     for (int i = 0; i < b-a+1; i++){
         line[i] = a+i;
     }
     return line;
 }
-template int* linspace(int,int,int);
+// template int* linspace(int,int,int);
+// template double* linspace(int,int,int);
+
+const complex<double> t(0.0,1.0);
+complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_direc, double *ion_charges, int natoms, complex<double>* fz_i_h){
+    complex<double> S;
+    double two_pi_mx=2*M_PI*mx,two_pi_my=2*M_PI*my;
+    for(int tx = 0; tx < Grid; tx++){
+        complex<double> Sx=0;
+        for (int ty = 0; ty < Grid; ty++){
+            complex<double> Sy=0;
+            for (int i = 0; i < natoms; i++){
+                Sy+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
+            }
+            Sx+=Sy*exp((two_pi_my*ty)/Grid*t);
+        }
+        S+=Sx*exp((two_pi_mx*tx)/Grid*t);
+    }
+
+    return S;
+}
