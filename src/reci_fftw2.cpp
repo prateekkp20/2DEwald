@@ -5,7 +5,9 @@
 
 #define REAL 0
 #define IMAG 1
+// #define ENABLE_OMP 1
 const complex<double> t(0.0,1.0);
+double FourPiPi = 4*M_PI*M_PI;
 
 struct reciprocal_n_params {
     double* ion_charges;
@@ -16,7 +18,7 @@ struct reciprocal_n_params {
     int *n;
     double **G;
     double **x_direc, **y_direc, **z_direc;
-    int * TZ ;
+    double * TZ ;
     int GridZ;
 };
 
@@ -31,17 +33,19 @@ double reciprocal_ft_integrand(double h, void *params){
     int *n = p->n;
     auto G = p->G;
     auto x_direc=p->x_direc,y_direc=p->y_direc,z_direc=p->z_direc;
-    int *TZ=p->TZ;
+    double *TZ=p->TZ;
     int GridZ = p->GridZ;
 
     long double reciprocal_energy_i=0;
     double deno = 4*betaa*betaa;
-    double FourPiPi = 4*M_PI*M_PI;
     double TwoPi_Gridx = 2*M_PI/Grid[0];
     double TwoPi_Gridy = 2*M_PI/Grid[1];
 
     // the fourier integral of z_direc vector for every ith atom
     complex<double>* fz_i_h = new complex<double> [natoms];
+    #if defined ENABLE_OMP
+        #pragma omp parallel for schedule(runtime)
+    #endif
     for (int  i = 0; i < natoms; i++){
         for (int  tz = 0; tz < GridZ; tz++){
             fz_i_h[i]+=z_direc[i][tz]*exp(h*TZ[tz]*t);
@@ -91,6 +95,11 @@ double reciprocal_ft_integrand(double h, void *params){
 
 // Main Function to Calculate the Reciprocal Energy (k!=0)
 double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int *Grid, int *n){
+
+    #if defined ENABLE_OMP
+        omp_set_num_threads(thread::hardware_concurrency());
+    #endif
+    
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 
@@ -130,15 +139,21 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     }
 
     // Calculating the fractional coordinates in x and y directions
+    #if defined ENABLE_OMP
+        #pragma omp parallel for schedule(runtime)
+    #endif
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 2; j++){
             u[i][j]=Grid[j]*dotProduct(PosIons[i],G[j],3);
         }
     }
-    int * TZ = linspace(-n[2],(int)Length[2],1);
+    double * TZ = linspace(-n[2],(int)Length[2],1);
     int l_max=1;
 
     // Calculating the cofficients in the x,y and z directions for the Q Matrix
+    #if defined ENABLE_OMP
+        #pragma omp parallel for schedule(runtime)
+    #endif
     for (int i = 0; i < natoms; i++){
         // for X direction
         for (int  tx = 0; tx < Grid[0]; tx++){
@@ -168,7 +183,6 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     double result, error;
     gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
     gsl_integration_workspace_free(workspace); // Free workspace memory
-
     // gsl_integration_romberg_workspace *workspace = gsl_integration_romberg_alloc(12);
     // size_t size = 12;
     // gsl_integration_romberg(&F,-10,10, 1e-7, 1e-2, &result, &size, workspace);
