@@ -54,14 +54,14 @@ double error(T2 a, T2 b);
 template<typename T3>
 double percentReduction(T3 newValue, T3 oldValue);
 
-template<typename T4>
-T4* linspace(T4 a, T4 b, T4 num);
+// template<typename T4>
+double* linspace(int a, int b, int num);
 
 double reciprocal_fastft_integrand(double h, void *params);
 
 double reciprocal_ft_integrand(double h, void *params);
 
-double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n);
+double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int *Grid, int *n);
 
 double reciprocal_pppm(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
 
@@ -72,3 +72,7 @@ complex<double> StructureFactor(int mx, int my, double h, double **PosIons, doub
 complex<double> StructureFactor2(int mx, int my, double h, double **PosIons, double *ion_charges, int natoms, double **box, int Grid, int n);
 
 complex<double> StructureFactor3(int mx, int my, double h, double **PosIons, double *ion_charges, int natoms, double **box, int Grid, int n);
+
+complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_direc, double *ion_charges, int natoms, complex<double>* fz_i_h);
+
+double without(double **PosIons, int natoms, double **box, int *n);
