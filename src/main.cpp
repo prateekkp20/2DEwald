@@ -120,26 +120,23 @@ int main(int argc, char **argv){
 		cerr << "File EWALDIn could not be opened" <<endl;
 		exit(1);
 	}
-
-	int gx, gy, gz, nx, ny, nz;
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>gx;
+	// grid size for x and y direction; order of bspline interpolation in the x, y and z direction
+	int grid[2], order[3];
 
 	EWALDIn>>garbage>>garbage;
-	EWALDIn>>gy;                                    
+	EWALDIn>>grid[0];
 
 	EWALDIn>>garbage>>garbage;
-	EWALDIn>>gz;                             
+	EWALDIn>>grid[1];
 
 	EWALDIn>>garbage>>garbage;
-	EWALDIn>>nx;                             
+	EWALDIn>>order[0];                             
 
 	EWALDIn>>garbage>>garbage;
-	EWALDIn>>ny;                             
+	EWALDIn>>order[1];                             
 
 	EWALDIn>>garbage>>garbage;
-	EWALDIn>>nz;                             
+	EWALDIn>>order[2];                             
 
 	EWALDIn.close();
 
@@ -311,7 +308,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the 2D FT and 1D FI method*/
 	chrono::time_point<std::chrono::system_clock> start3, end3;
 	start3 = chrono::system_clock::now();
-	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6, 32 ,8)*unitzer;
+	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6 ,grid ,order)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy FT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
 	end3 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds3 = end3 - start3;
@@ -362,11 +359,32 @@ int main(int argc, char **argv){
 	// chrono::duration<double> elapsed_seconds7 = end7- start7;
     // time_t end_time7 = std::chrono::system_clock::to_time_t(end7);
 	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds7.count() << " sec\n\n";
-	int mx=4,my=-6;
-	double h = 0.012887;
-	cout<<fixed<<setprecision(8)<<StructureFactor(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
-	cout<<fixed<<setprecision(8)<<StructureFactor2(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
-	cout<<fixed<<setprecision(8)<<StructureFactor3(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
+
+	/*Testing the fiNUFFT library*/
+	/*Without*/
+	// chrono::time_point<std::chrono::system_clock> start7, end7;
+	// start7 = chrono::system_clock::now();
+	// double out = without(PosIons,natoms,boxcell,order);
+	// end7 = chrono::system_clock::now();
+	// chrono::duration<double> elapsed_seconds7 = end7- start7;
+    // time_t end_time7 = std::chrono::system_clock::to_time_t(end7);
+	// cout<<fixed<<setprecision(8)<< "Elapsed timer: " << elapsed_seconds7.count() << " sec\n\n";
+	
+	
+	/*With*/
+	// chrono::time_point<std::chrono::system_clock> start6, end6;
+	// start6 = chrono::system_clock::now();
+	
+	// end6 = chrono::system_clock::now();
+	// chrono::duration<double> elapsed_seconds6 = end6- start6;
+    // time_t end_time6 = std::chrono::system_clock::to_time_t(end6);
+	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds6.count() << " sec\n\n";
+
+	// int mx=6,my=6;
+	// double h = -0.0261105;
+	// cout<<fixed<<setprecision(8)<<StructureFactor(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
+	// cout<<fixed<<setprecision(8)<<StructureFactor2(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
+	// cout<<fixed<<setprecision(8)<<StructureFactor3(mx,my,h,PosIons,ion_charges,natoms,boxcell,32,8)<<"\n";
 
 	// delete dynamic variables 
 	for(i=0;i<3;i++){
