@@ -2,6 +2,7 @@
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
+const complex<double> t(0,1);
 
 #define ENABLE_OMP 1
 
@@ -28,8 +29,12 @@ double integrand_reciprocal(double h, void *params){
 
     double reciprocal_energy_i=0;
 
-    complex<double> t(0,1);
+    #if defined ENABLE_OMP
+        omp_set_num_threads(thread::hardware_concurrency());
+    #endif
+
     double G[3]={2*M_PI/Length[0], 2*M_PI/Length[1], h};
+    double bet = 4*betaa*betaa;
     #if defined ENABLE_OMP
         #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
     #endif
@@ -40,12 +45,13 @@ double integrand_reciprocal(double h, void *params){
             complex<double> s_kh=0;
             for (int  i = 0; i < natoms; i++){
                 double G_dot_r=k*G[0]*PosIons[i][0]+l*G[1]*PosIons[i][1]+G[2]*PosIons[i][2];
-                complex<double> charge(ion_charges[i],0.0);
-                s_kh+=charge*(cos(G_dot_r)+t*sin(G_dot_r));
+                // complex<double> charge(ion_charges[i],0.0);
+                // s_kh+=charge*(cos(G_dot_r)+t*sin(G_dot_r));
+                s_kh+=ion_charges[i]*(cos(G_dot_r)+t*sin(G_dot_r));
             }
             double norm_sg = norm(s_kh);
             double norm_g = k*k*G[0]*G[0]+l*l*G[1]*G[1]+G[2]*G[2];
-            reciprocal_energy_i+=norm_sg/(norm_g*exp(norm_g/(4*betaa*betaa)));
+            reciprocal_energy_i+=norm_sg/(norm_g*exp(norm_g/(bet)));
         }
     }
     return reciprocal_energy_i;
@@ -55,7 +61,7 @@ double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, doub
     // this is for Ui
     //Length of the sides of the unit cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
-    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(100);
+    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(10);
 
     gsl_function F;
     F.function = &integrand_reciprocal; // Set the function to integrate
@@ -63,7 +69,7 @@ double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, doub
     F.params = &params;
 
     double result, error;
-    gsl_integration_qagi(&F, 1e-8, 1e-2, 100, workspace, &result, &error);
+    gsl_integration_qagi(&F, 1e-4, 1e-2, 10, workspace, &result, &error);
     gsl_integration_workspace_free(workspace); // Free workspace memory
     result*=1/(Length[0]*Length[1]);
     return result;
