@@ -76,6 +76,7 @@ complex<double> StructureFactor(int mx, int my, double h, double **PosIons, doub
         }
     }
 
+    // This is the fourier transform calculations of the Structure Factor Q which has x_direc, y_direc, and z_direc as the components in the different directions
     complex<double> S;
     double two_pi_mx=2*M_PI*mx,two_pi_my=2*M_PI*my;
     for (int i = 0; i < natoms; i++){
