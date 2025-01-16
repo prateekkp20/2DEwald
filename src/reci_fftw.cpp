@@ -1,4 +1,5 @@
 // this code implements the reciprocal (k!=0) energy using the bspline method with 2D Fourier Transform and 1D Fourier Integral
+// this code does not use any of functionalities of the FFTW library and calculate all the fourier transforms using the for loops using simple fourier transforms implementations
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
