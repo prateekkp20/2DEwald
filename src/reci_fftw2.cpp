@@ -3,16 +3,18 @@
 #include "const.h"
 #include "fundec.h"
 
-#define REAL 0
-#define IMAG 1
-// #define ENABLE_OMP 1
+#define ENABLE_OMP 1
 const complex<double> t(0.0,1.0);
+complex<double> Coeff_H_nz;
 double FourPiPi = 4*M_PI*M_PI;
+double TwoPi_Gridx, TwoPi_Gridy, deno;
+
+// storing the coeff matrix terms
+complex<double> *CoeffX,*CoeffY;
 
 struct reciprocal_n_params {
     double* ion_charges;
     int natoms;
-    double betaa;
     int K;
     int *Grid;
     int *n;
@@ -26,7 +28,6 @@ double reciprocal_ft_integrand(double h, void *params){
     reciprocal_n_params* p = (struct reciprocal_n_params*)params;
     double *ion_charges = p->ion_charges;
     int natoms = p->natoms;
-    double betaa = p->betaa;
     int K = p->K;
     int *Grid = p->Grid;
     // n: order of b-spline interpolation
@@ -37,9 +38,6 @@ double reciprocal_ft_integrand(double h, void *params){
     int GridZ = p->GridZ;
 
     long double reciprocal_energy_i=0;
-    double deno = 4*betaa*betaa;
-    double TwoPi_Gridx = 2*M_PI/Grid[0];
-    double TwoPi_Gridy = 2*M_PI/Grid[1];
 
     // the fourier integral of z_direc vector for every ith atom
     complex<double>* fz_i_h = new complex<double> [natoms];
@@ -76,18 +74,19 @@ double reciprocal_ft_integrand(double h, void *params){
     // fftw_destroy_plan(plan);
     // fftw_cleanup();
 
-    int ii,jj;
+    Coeff_H_nz = Coeff(h,8);
+    int ii,ic,jj,jc;
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
             if(i==0&&j==0)continue;
-            if(i<0)ii=Grid[0]+i;
-            else ii=i;
-            if(j<0)jj=Grid[1]+j;
-            else jj=j;
+            if(i<0){ii=Grid[0]+i;ic=K-i;}
+            else {ii=i;ic=i;}
+            if(j<0){jj=Grid[1]+j;jc=K-j;}
+            else {jj=j;jc=j;}
             int temp = Grid[1]*ii+jj;
             double factor = FourPiPi * (i*i*G[0][0]*G[0][0]+j*j*G[1][1]*G[1][1]) + h*h;
             double norm_FQ = norm(out[temp][0] + t*out[temp][1]);
-            reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Gridx*i,n[0])*Coeff(TwoPi_Gridy*j,n[1])*Coeff(h,8)) / (factor*exp(factor/deno));
+            reciprocal_energy_i+= norm_FQ  * norm(CoeffX[ic]*CoeffY[jc]*Coeff_H_nz) / (factor*exp(factor/deno));
         }
     }
     return reciprocal_energy_i;
@@ -102,6 +101,19 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
+
+    deno = 4*betaa*betaa;
+    TwoPi_Gridx = 2*M_PI/Grid[0];
+    TwoPi_Gridy = 2*M_PI/Grid[1];
+
+    CoeffX = new complex<double> [2*K+1];
+    CoeffY = new complex<double> [2*K+1];
+    for (int i = -K; i < K+1; i++){
+        int ic;
+        i<0?ic=K-i:ic=i;
+        CoeffX[ic] = Coeff(TwoPi_Gridx*i,n[0]);
+        CoeffY[ic] = Coeff(TwoPi_Gridy*i,n[1]);
+    }
 
     // Volume Calculations
     double A[3];
@@ -178,7 +190,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(200);
     gsl_function F;
     F.function = &reciprocal_ft_integrand; // Set the function to integrate
-    reciprocal_n_params params = {ion_charges, natoms, betaa, K, Grid, n, G, x_direc, y_direc, z_direc, TZ, GridZ};
+    reciprocal_n_params params = {ion_charges, natoms, K, Grid, n, G, x_direc, y_direc, z_direc, TZ, GridZ};
     F.params = &params;
     double result, error;
     gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
