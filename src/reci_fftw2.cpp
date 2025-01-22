@@ -59,13 +59,18 @@ double reciprocal_ft_integrand(double h, void *params){
     fftw_plan plan;
     plan = fftw_plan_dft_2d(Grid[0], Grid[1], in ,out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
+    complex<double> temp;
+    #pragma omp parallel for private(temp)
     for (int i = 0; i < natoms; i++){
         for (int tx = 0; tx < Grid[0]; tx++){
             if(x_direc[i][tx]==0)continue;
             for (int ty = 0; ty < Grid[1]; ty++){   
                 if(y_direc[i][ty]==0)continue;
-                in[Grid[1]*tx+ty][0]+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i].real();
-                in[Grid[1]*tx+ty][1]+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i].imag();
+                complex<double> temp = ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
+                #pragma omp atomic update
+                    in[Grid[1]*tx+ty][0]+=temp.real();
+                #pragma omp atomic update
+                    in[Grid[1]*tx+ty][1]+=temp.imag();
             }
         }
     }
