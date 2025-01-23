@@ -8,6 +8,7 @@ const complex<double> t(0.0,1.0);
 complex<double> Coeff_H_nz;
 double FourPiPi = 4*M_PI*M_PI;
 double TwoPi_Gridx, TwoPi_Gridy, deno;
+double *ReciVector;
 
 // storing the coeff matrix terms
 complex<double> *CoeffX,*CoeffY;
@@ -18,7 +19,6 @@ struct reciprocal_n_params {
     int K;
     int *Grid;
     int *n;
-    double **G;
     double **x_direc, **y_direc, **z_direc;
     double * TZ ;
     int GridZ;
@@ -32,12 +32,11 @@ double reciprocal_ft_integrand(double h, void *params){
     int *Grid = p->Grid;
     // n: order of b-spline interpolation
     int *n = p->n;
-    auto G = p->G;
     auto x_direc=p->x_direc,y_direc=p->y_direc,z_direc=p->z_direc;
     double *TZ=p->TZ;
     int GridZ = p->GridZ;
 
-    long double reciprocal_energy_i=0;
+    double reciprocal_energy_i=0;
 
     // the fourier integral of z_direc vector for every ith atom
     complex<double>* fz_i_h = new complex<double> [natoms];
@@ -60,16 +59,22 @@ double reciprocal_ft_integrand(double h, void *params){
     plan = fftw_plan_dft_2d(Grid[0], Grid[1], in ,out, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     complex<double> temp;
-    #pragma omp parallel for private(temp)
+    #if defined ENABLE_OMP
+        #pragma omp parallel for private(temp)
+    #endif
     for (int i = 0; i < natoms; i++){
         for (int tx = 0; tx < Grid[0]; tx++){
             if(x_direc[i][tx]==0)continue;
             for (int ty = 0; ty < Grid[1]; ty++){   
                 if(y_direc[i][ty]==0)continue;
-                complex<double> temp = ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
-                #pragma omp atomic update
+                temp = ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
+                #if defined ENABLE_OMP
+                    #pragma omp atomic update
+                #endif
                     in[Grid[1]*tx+ty][0]+=temp.real();
-                #pragma omp atomic update
+                #if defined ENABLE_OMP
+                    #pragma omp atomic update
+                #endif
                     in[Grid[1]*tx+ty][1]+=temp.imag();
             }
         }
@@ -89,7 +94,7 @@ double reciprocal_ft_integrand(double h, void *params){
             if(j<0){jj=Grid[1]+j;jc=K-j;}
             else {jj=j;jc=j;}
             int temp = Grid[1]*ii+jj;
-            double factor = FourPiPi * (i*i*G[0][0]*G[0][0]+j*j*G[1][1]*G[1][1]) + h*h;
+            double factor = ReciVector[ic*(2*K+1)+jc] + h*h;
             double norm_FQ = norm(out[temp][0] + t*out[temp][1]);
             reciprocal_energy_i+= norm_FQ  * norm(CoeffX[ic]*CoeffY[jc]*Coeff_H_nz) / (factor*exp(factor/deno));
         }
@@ -138,6 +143,18 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     for (int x = 0; x < 3; x++)
         for (int q = 0; q < 3; q++)
             G[x][q] /= volume;
+
+    int ii,ic,jj,jc;
+    ReciVector = new double [(2*K+1)*(2*K+1)];
+    for (int i = -K; i < K+1; i++){
+        for (int j = -K; j< K+1; j++){
+                if(i<0){ic=K-i;}
+                else {ic=i;}
+                if(j<0){jc=K-j;}
+                else {jc=j;}
+                ReciVector[ic*(2*K+1)+jc] = FourPiPi * (i*i*G[0][0]*G[0][0]+j*j*G[1][1]*G[1][1]);
+        }
+    }
 
     // initializing the new variables
     // u: the fractional coordinates in x and y directions
@@ -195,7 +212,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(200);
     gsl_function F;
     F.function = &reciprocal_ft_integrand; // Set the function to integrate
-    reciprocal_n_params params = {ion_charges, natoms, K, Grid, n, G, x_direc, y_direc, z_direc, TZ, GridZ};
+    reciprocal_n_params params = {ion_charges, natoms, K, Grid, n, x_direc, y_direc, z_direc, TZ, GridZ};
     F.params = &params;
     double result, error;
     gsl_integration_qagi(&F, 1e-4, 1e-2, 200, workspace, &result, &error);
@@ -206,6 +223,25 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     // gsl_integration_romberg_free(workspace); // Free workspace memory
     
     // gsl_integration_qag(&F, -5, 5, 1e-4, 1e-2, 200, GSL_INTEG_GAUSS15, workspace, &result, &error);
+
+    delete [] TZ;
+    for (int  i = 0; i < natoms; i++){
+        delete [] u[i];
+        delete [] x_direc[i];
+        delete [] y_direc[i];
+        delete [] z_direc[i];
+    }
+    for (int i = 0; i < 3; i++){
+        delete [] G[i];
+    }
+    delete [] G;
+    delete [] u;
+    delete [] x_direc;
+    delete [] y_direc;
+    delete [] z_direc;
+    delete [] ReciVector;
+    delete [] CoeffX;
+    delete [] CoeffY;
 
     result*=1/(Length[0]*Length[1]);
     return result;
