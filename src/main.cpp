@@ -5,6 +5,11 @@
 #include "const.h"
 #include "fftw3.h"
 #include "complex"
+#include "header.h"
+
+double G[3][3];
+double volume;
+complex<double> *CoeffX,*CoeffY;
 
 int main(int argc, char **argv){
 
@@ -280,6 +285,36 @@ int main(int argc, char **argv){
 	double Lmin=min(boxcell[0][0],min(boxcell[1][1],boxcell[2][2]));
 	double beta=5.42/Lmin;
 	double cutoff = Lmin/2;
+	int K = 6; //convergence limits for the reci sum
+
+	// Volume Calculations
+    double A[3];
+    double C[3]={boxcell[2][0],boxcell[2][1],boxcell[2][2]};
+    crossProduct(boxcell[0],boxcell[1],A);
+    double volume = dotProduct(A,C,3);
+
+	// Calculating the reciprocal vectors
+    crossProduct(boxcell[1],boxcell[2],G[0]);
+    crossProduct(boxcell[2],boxcell[0],G[1]);
+    crossProduct(boxcell[0],boxcell[1],G[2]);
+    for (int x = 0; x < 3; x++)
+        for (int q = 0; q < 3; q++)
+            G[x][q] /= volume;
+
+	/*Useful configuration independent Computations for the reciprocal space summation*/
+	/*Cofficients Bi[mi] of the bspline interpolation*/ //Refer to Essmann et al.
+	// The negative indices are stored from the end of the array
+	CoeffX = new complex<double> [2*K+1];
+    CoeffY = new complex<double> [2*K+1];
+	double TwoPi_Gridx = 2*M_PI/grid[0];
+    double TwoPi_Gridy = 2*M_PI/grid[1];
+	for (int i = -K; i < K+1; i++){
+        int ic;
+        if(i<0) {ic=K-i;}
+        else {ic=i;}
+        CoeffX[ic] = Coeff(TwoPi_Gridx*i,order[0]);
+        CoeffY[ic] = Coeff(TwoPi_Gridy*i,order[1]);
+    }
 	
 	/*Self Energy*/
 	// double selfenergy=self(n_atomtype, natoms_type, chg, beta)*unitzer;
@@ -308,7 +343,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the 2D FT and 1D FI method*/
 	chrono::time_point<std::chrono::system_clock> start3, end3;
 	start3 = chrono::system_clock::now();
-	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell,6 ,grid ,order)*unitzer;
+	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell, K,grid ,order)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy FT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
 	end3 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds3 = end3 - start3;
@@ -318,7 +353,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the integral method*/
 	chrono::time_point<std::chrono::system_clock> start4, end4;
 	start4 = chrono::system_clock::now();
-	double recienergy_ka=reciprocal_kawata(PosIons, ion_charges, natoms, beta, boxcell,6)*unitzer;
+	double recienergy_ka=reciprocal_kawata(PosIons, ion_charges, natoms, beta, boxcell, K)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy Integral(k!=0): "<<recienergy_ka<<" Kcal/mol"<<"\n";
 	end4 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds4 = end4- start4;

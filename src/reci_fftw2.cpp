@@ -2,16 +2,14 @@
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
+#include "header.h"
 
 #define ENABLE_OMP 1
 const complex<double> t(0.0,1.0);
 complex<double> Coeff_H_nz;
 double FourPiPi = 4*M_PI*M_PI;
-double TwoPi_Gridx, TwoPi_Gridy, deno;
+double deno;
 double *ReciVector;
-
-// storing the coeff matrix terms
-complex<double> *CoeffX,*CoeffY;
 
 struct reciprocal_n_params {
     double* ion_charges;
@@ -85,9 +83,10 @@ double reciprocal_ft_integrand(double h, void *params){
     // fftw_cleanup();
 
     Coeff_H_nz = Coeff(h,8);
-    int ii,ic,jj,jc;
+    #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
     for (int i = -K; i < K+1; i++){
         for (int j = -K; j< K+1; j++){
+            int ii,ic,jj,jc;
             if(i==0&&j==0)continue;
             if(i<0){ii=Grid[0]+i;ic=K-i;}
             else {ii=i;ic=i;}
@@ -113,36 +112,17 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 
     deno = 4*betaa*betaa;
-    TwoPi_Gridx = 2*M_PI/Grid[0];
-    TwoPi_Gridy = 2*M_PI/Grid[1];
+    // TwoPi_Gridx = 2*M_PI/Grid[0];
+    // TwoPi_Gridy = 2*M_PI/Grid[1];
 
-    CoeffX = new complex<double> [2*K+1];
-    CoeffY = new complex<double> [2*K+1];
-    for (int i = -K; i < K+1; i++){
-        int ic;
-        i<0?ic=K-i:ic=i;
-        CoeffX[ic] = Coeff(TwoPi_Gridx*i,n[0]);
-        CoeffY[ic] = Coeff(TwoPi_Gridy*i,n[1]);
-    }
-
-    // Volume Calculations
-    double A[3];
-    double C[3]={box[2][0],box[2][1],box[2][2]};
-    crossProduct(box[0],box[1],A);
-    double volume = dotProduct(A,C,3);
-
-    // Calculating the reciprocal vectors
-    double **G;
-    G= new double * [3];
-    for (int i = 0; i < 3; i++){
-        G[i] = new double  [3];
-    }
-    crossProduct(box[1],box[2],G[0]);
-    crossProduct(box[2],box[0],G[1]);
-    crossProduct(box[0],box[1],G[2]);
-    for (int x = 0; x < 3; x++)
-        for (int q = 0; q < 3; q++)
-            G[x][q] /= volume;
+    // CoeffX = new complex<double> [2*K+1];
+    // CoeffY = new complex<double> [2*K+1];
+    // for (int i = -K; i < K+1; i++){
+    //     int ic;
+    //     i<0?ic=K-i:ic=i;
+    //     CoeffX[ic] = Coeff(TwoPi_Gridx*i,n[0]);
+    //     CoeffY[ic] = Coeff(TwoPi_Gridy*i,n[1]);
+    // }
 
     int ii,ic,jj,jc;
     ReciVector = new double [(2*K+1)*(2*K+1)];
@@ -231,17 +211,11 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
         delete [] y_direc[i];
         delete [] z_direc[i];
     }
-    for (int i = 0; i < 3; i++){
-        delete [] G[i];
-    }
-    delete [] G;
     delete [] u;
     delete [] x_direc;
     delete [] y_direc;
     delete [] z_direc;
     delete [] ReciVector;
-    delete [] CoeffX;
-    delete [] CoeffY;
 
     result*=1/(Length[0]*Length[1]);
     return result;
