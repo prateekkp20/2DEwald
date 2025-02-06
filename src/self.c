@@ -1,7 +1,8 @@
 #include "libinclude.h"
 #include "const.h"
+#include "fundec.h"
 
-double self(int n_atomtype, int *natoms_type, float *chargs, float betaa){
+double self(int n_atomtype, int *natoms_type, double *chargs, double betaa){
     double self_energy=0;
     #pragma omp SIMD
     for (int i = 0; i < n_atomtype; i++){
