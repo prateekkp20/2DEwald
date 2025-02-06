@@ -19,5 +19,5 @@ double reci0(double *PosIons2, double *charge_prod, int natoms, double betaa, do
         }
     }
     
-    return 2*sqrt(M_PI)*energy/(betaa*Length[0]*Length[1]);;
+    return 2*sqrt(M_PI)*energy/(betaa*Length[0]*Length[1]);
 }
