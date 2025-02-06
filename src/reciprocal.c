@@ -4,15 +4,15 @@
 
 #define ENABLE_OMP 1
 
-double reciprocal_n2(double **PosIons, double *charge_prod, double *ion_charges, int natoms, double betaa, double **box, int K){
+double reciprocal_n2(double **PosIons, double *charge_prod, double *ion_charges, int natoms, double betaa, double **box, int *K){
     double reciprocal_energy_i=0;
     #if defined ENABLE_OMP
         omp_set_num_threads(thread::hardware_concurrency());
     #endif
     // this is the loop for Ui
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
-    for (int k = -K; k < K+1; k++){
-        for (int l = -K; l < K+1; l++){
+    for (int k = -K[0]; k < K[0]+1; k++){
+        for (int l = -K[1]; l < K[1]+1; l++){
             if((k==0) && (l==0)) continue;
             double sigma= k/Length[0];
             double psi= l/Length[1];

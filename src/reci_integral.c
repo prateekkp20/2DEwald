@@ -12,7 +12,7 @@ struct reciprocal_n_params{
   int natoms;
   double betaa;
   double** box;
-  int K;
+  int *K;
   double* Length;
 };
 
@@ -24,7 +24,7 @@ double integrand_reciprocal(double h, void *params){
     int natoms = p->natoms;
     double betaa = p->betaa;
     double **box = p->box;
-    int K = p->K;
+    int *K = p->K;
     double* Length = p->Length;
 
     double reciprocal_energy_i=0;
@@ -39,8 +39,8 @@ double integrand_reciprocal(double h, void *params){
         #pragma omp parallel for simd schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
     #endif
 
-    for (int k = -K; k < K+1; k++){
-        for (int l = -K; l < K+1; l++){
+    for (int k = -K[0]; k < K[0]+1; k++){
+        for (int l = -K[1]; l < K[1]+1; l++){
             if((k==0) && (l==0))continue;
             complex<double> s_kh=0;
             for (int  i = 0; i < natoms; i++){
@@ -57,7 +57,7 @@ double integrand_reciprocal(double h, void *params){
     return reciprocal_energy_i;
 }
 
-double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K) {
+double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K) {
     // this is for Ui
     //Length of the sides of the unit cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
