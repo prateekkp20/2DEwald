@@ -14,7 +14,7 @@ void printVel(double **Vel, int natoms, string *type);
 
 void printprobVel(double **vel, int natoms, double *mass, float Temp);
 
-double self(int n_atomtype, int *natoms_type, float *chargs, double betaa);
+double self(int n_atomtype, int *natoms_type, double *chargs, double betaa);
 
 double real(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box, double cutoff);
 
@@ -26,9 +26,9 @@ double F_kl_I(double *ri, double *rj, double sigma, double psi, double beta, dou
 
 double F_kl_0(double sigma, double psi, double beta);
 
-double reciprocal_n2(double **PosIons, double *charge_prod,  double *ion_charges, int natoms, double betaa, double **box, int K);
+double reciprocal_n2(double **PosIons, double *charge_prod,  double *ion_charges, int natoms, double betaa, double **box, int *K);
 
-double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K);
+double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K);
 
 double integrand_reciprocal(double h, void *params);
 
@@ -61,9 +61,7 @@ double reciprocal_fastft_integrand(double h, void *params);
 
 double reciprocal_ft_integrand(double h, void *params);
 
-double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int *Grid, int *n);
-
-double reciprocal_pppm(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
+double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K, int *Grid, int *n);
 
 double reciprocal_pppm_chebyshev(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
 
@@ -76,3 +74,15 @@ complex<double> StructureFactor3(int mx, int my, double h, double **PosIons, dou
 complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_direc, double *ion_charges, int natoms, complex<double>* fz_i_h);
 
 double without(double **PosIons, int natoms, double **box, int *n);
+
+double PM2DEwald(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n);
+
+double hat_function(double s, double gamma, double L);
+
+double C_integrand(double s, void *params);
+
+double C(double t, double n, double gamma, double L);
+
+double constant_integrand(double t, void *params);
+
+double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, double beta, double gamma);
