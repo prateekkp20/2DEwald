@@ -14,7 +14,7 @@ double *ReciVector;
 struct reciprocal_n_params {
     double* ion_charges;
     int natoms;
-    int K;
+    int *K;
     int *Grid;
     int *n;
     double **x_direc, **y_direc, **z_direc;
@@ -26,7 +26,7 @@ double reciprocal_ft_integrand(double h, void *params){
     reciprocal_n_params* p = (struct reciprocal_n_params*)params;
     double *ion_charges = p->ion_charges;
     int natoms = p->natoms;
-    int K = p->K;
+    int *K = p->K;
     int *Grid = p->Grid;
     // n: order of b-spline interpolation
     int *n = p->n;
@@ -84,16 +84,16 @@ double reciprocal_ft_integrand(double h, void *params){
 
     Coeff_H_nz = Coeff(h,8);
     #pragma omp parallel for schedule(runtime) reduction(+: reciprocal_energy_i) collapse(2)
-    for (int i = -K; i < K+1; i++){
-        for (int j = -K; j< K+1; j++){
+    for (int i = -K[0]; i < K[0]+1; i++){
+        for (int j = -K[1]; j< K[1]+1; j++){
             int ii,ic,jj,jc;
             if(i==0&&j==0)continue;
-            if(i<0){ii=Grid[0]+i;ic=K-i;}
+            if(i<0){ii=Grid[0]+i;ic=(2*K[0]+1)+i;}
             else {ii=i;ic=i;}
-            if(j<0){jj=Grid[1]+j;jc=K-j;}
+            if(j<0){jj=Grid[1]+j;jc=(2*K[1]+1)+j;}
             else {jj=j;jc=j;}
             int temp = Grid[1]*ii+jj;
-            double factor = ReciVector[ic*(2*K+1)+jc] + h*h;
+            double factor = ReciVector[ic*(2*K[1]+1)+jc] + h*h;
             double norm_FQ = norm(out[temp][0] + t*out[temp][1]);
             reciprocal_energy_i+= norm_FQ  * norm(CoeffX[ic]*CoeffY[jc]*Coeff_H_nz) / (factor*exp(factor/deno));
         }
@@ -102,7 +102,7 @@ double reciprocal_ft_integrand(double h, void *params){
 }
 
 // Main Function to Calculate the Reciprocal Energy (k!=0)
-double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int *Grid, int *n){
+double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K, int *Grid, int *n){
 
     #if defined ENABLE_OMP
         omp_set_num_threads(thread::hardware_concurrency());
@@ -112,27 +112,16 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 
     deno = 4*betaa*betaa;
-    // TwoPi_Gridx = 2*M_PI/Grid[0];
-    // TwoPi_Gridy = 2*M_PI/Grid[1];
-
-    // CoeffX = new complex<double> [2*K+1];
-    // CoeffY = new complex<double> [2*K+1];
-    // for (int i = -K; i < K+1; i++){
-    //     int ic;
-    //     i<0?ic=K-i:ic=i;
-    //     CoeffX[ic] = Coeff(TwoPi_Gridx*i,n[0]);
-    //     CoeffY[ic] = Coeff(TwoPi_Gridy*i,n[1]);
-    // }
 
     int ii,ic,jj,jc;
-    ReciVector = new double [(2*K+1)*(2*K+1)];
-    for (int i = -K; i < K+1; i++){
-        for (int j = -K; j< K+1; j++){
-                if(i<0){ic=K-i;}
+    ReciVector = new double [(2*K[0]+1)*(2*K[1]+1)];
+    for (int i = -K[0]; i < K[0]+1; i++){
+        for (int j = -K[1]; j< K[1]+1; j++){
+                if(i<0){ic=(2*K[0]+1)+i;}
                 else {ic=i;}
-                if(j<0){jc=K-j;}
+                if(j<0){jc=(2*K[1]+1)+j;}
                 else {jc=j;}
-                ReciVector[ic*(2*K+1)+jc] = FourPiPi * (i*i*G[0][0]*G[0][0]+j*j*G[1][1]*G[1][1]);
+                ReciVector[ic*(2*K[1]+1)+jc] = FourPiPi * (i*i*G[0][0]*G[0][0]+j*j*G[1][1]*G[1][1]);
         }
     }
 
