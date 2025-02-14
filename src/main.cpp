@@ -162,8 +162,8 @@ int main(int argc, char **argv){
 	getline(PosIn, garbage);
 	istringstream StrStream(garbage);
 
-	int n_atomtype=0;
 	// Counting through the types of the atoms present in the cell and storing in the n_atomtype variable
+	int n_atomtype=0;
 	while(StrStream){
 		getline(StrStream, garbage1, ' ');
 		if(garbage1.compare("") != 0)
@@ -260,6 +260,16 @@ int main(int argc, char **argv){
 
 	CHARGEIn.close();
 
+	/*Checking Charge Neutrality for the system*/
+	double total_charge = 0;
+	for (int i = 0; i < n_atomtype; i++){
+		total_charge += chg[i]* natoms_type[i];
+	}
+	if(total_charge){
+		cout<<"Error: System is not charge neutral"<<endl;
+		return 0;
+	}
+	
 	//-------------------------creating the charge array for each atom present in the unit cell ------------------------------//
 	double *ion_charges;
 	double *charge_prod;
@@ -285,6 +295,13 @@ int main(int argc, char **argv){
 	// print_carcoor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "CONTCAR");
 	// print_coor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "COOR");
 	// print_lammps_input_file(PosIons, chg, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "exp1box45/e12000.data");
+
+	/*Check for orthogonality of sides*/
+	/*Ewald method only works for unit cell with orthogonal sides*/
+	if(dotProduct(boxcell[1],boxcell[0],3) || dotProduct(boxcell[2],boxcell[0],3) || dotProduct(boxcell[1],boxcell[2],3)){
+		cout<<"Error: Unit Cell with Non Orthogonal Sides"<<endl;
+		return 0;
+	}
 
 	double Lmin=min(boxcell[0][0],min(boxcell[1][1],boxcell[2][2]));
 	double beta=5.42/Lmin;
@@ -331,7 +348,7 @@ int main(int argc, char **argv){
         else {ic=i;}
         CoeffZ[ic] = Coeff(TwoPi_Gridz*i,order[2]);
     }
-	
+
 	/* B(m1,m2,m3)*Exp(-|G|)/|G| term in the reciprocal loop*/
     double L1 = boxcell[0][0];
     double L2 = boxcell[1][1];
@@ -408,18 +425,6 @@ int main(int argc, char **argv){
 	chrono::duration<double> elapsed_seconds4 = end4- start4;
     time_t end_time4 = std::chrono::system_clock::to_time_t(end4);
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds4.count() << " sec\n\n";
-	
-	/*Reciprocal Energy (k!=0) using the PPPM method*/
-	// chrono::time_point<std::chrono::system_clock> start5, end5;
-	// start5 = chrono::system_clock::now();
-	// int Grid[]={gx,gy,gz};
-	// int order[]={nx,ny,nz};
-	// double recienergy_fft=reciprocal_pppm(PosIons, ion_charges, natoms, beta, boxcell,6, Grid ,order)*unitzer;
-	// cout<<fixed<<setprecision(15)<<"Reciprocal Energy FFT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
-	// end5 = chrono::system_clock::now();
-	// chrono::duration<double> elapsed_seconds5 = end5 - start5;
-    // time_t end_time5 = std::chrono::system_clock::to_time_t(end5);
-	// cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds5.count() << " sec\n\n";
 
 	/*Reciprocal Energy (k==0)*/
 	chrono::time_point<std::chrono::system_clock> start6, end6;
