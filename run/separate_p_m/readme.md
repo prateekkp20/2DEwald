@@ -1,1 +1,0 @@
-separating the positive and the negative atoms in the halfs of the cube of 25 A
