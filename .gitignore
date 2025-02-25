@@ -3,3 +3,4 @@ obj
 .vscode
 run/*.x
 terminal.txt
+run/POSCAR Files/*
