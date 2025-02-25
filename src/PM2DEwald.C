@@ -11,7 +11,6 @@
 double PM2DEwald(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n){
     // n: order of b-spline interpolation
    // initializing the new variables
-    // double G[3][3];
     double **u,**x_direc, **y_direc, **z_direc;
     u= new double * [natoms];
     x_direc= new double * [natoms];
