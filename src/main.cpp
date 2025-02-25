@@ -126,8 +126,20 @@ int main(int argc, char **argv){
 		cerr << "File EWALDIn could not be opened" <<endl;
 		exit(1);
 	}
-	// grid size for x and y direction; order of bspline interpolation in the x, y and z direction
-	int grid[3], order[3];
+	
+	// convergence limits for the reci sum
+	// grid size for x and y direction
+	// order of bspline interpolation in the x, y and z direction
+	int Kvec[3], grid[3], order[3];
+
+	EWALDIn>>garbage>>garbage;
+	EWALDIn>>Kvec[0];
+
+	EWALDIn>>garbage>>garbage;
+	EWALDIn>>Kvec[1];
+
+	EWALDIn>>garbage>>garbage;
+	EWALDIn>>Kvec[2];
 
 	EWALDIn>>garbage>>garbage;
 	EWALDIn>>grid[0];
@@ -306,7 +318,6 @@ int main(int argc, char **argv){
 	double Lmin=min(boxcell[0][0],min(boxcell[1][1],boxcell[2][2]));
 	double beta=5.42/Lmin;
 	double cutoff = Lmin/2;
-	int Kvec[3] = {6,6,64}; //convergence limits for the reci sum
 
 	// Volume Calculations
     double A[3];
