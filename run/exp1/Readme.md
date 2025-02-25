@@ -1,1 +1,0 @@
-## This folder contains the results of the simulation in which we have varied the total number of atoms in a 25 A cell with parallelization of the code with 12 threads
