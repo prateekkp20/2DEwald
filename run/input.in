@@ -1,4 +1,4 @@
-Project = Calculating Energies
+Project = Calculating Energies for 2D Ewald
 Posfile = POSCAR.kcl200
 generate_pairlist = 1
 Temp = 300
