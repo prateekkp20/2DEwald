@@ -4,7 +4,7 @@
 
 #define ENABLE_OMP 1
 
-double real(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box, double cutoff){
+double real(double *PosIons, double *charge_prod, int natoms, double betaa, double **box, double cutoff){
     double real_energy=0;
 
     #if defined ENABLE_OMP
@@ -14,7 +14,7 @@ double real(double *PosIons2, double *charge_prod, int natoms, double betaa, dou
 
         for (int i = 1; i < natoms; i++){
             for (int j = 0; j < i; j++){
-                    double modR=dist(PosIons2,i,j,box);
+                    double modR=dist(PosIons,i,j,box);
                     if(modR>cutoff)continue;
 
                     // Erfc Approximations
