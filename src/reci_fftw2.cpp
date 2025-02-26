@@ -102,7 +102,7 @@ double reciprocal_ft_integrand(double h, void *params){
 }
 
 // Main Function to Calculate the Reciprocal Energy (k!=0)
-double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K, int *Grid, int *n){
+double reciprocal_fft(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K, int *Grid, int *n){
 
     #if defined ENABLE_OMP
         omp_set_num_threads(thread::hardware_concurrency());
@@ -147,7 +147,8 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
     #endif
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 2; j++){
-            u[i][j]=Grid[j]*dotProduct(PosIons[i],G[j],3);
+            double x[3] = {PosIons[3*i],PosIons[3*i+1],PosIons[3*i+2]};
+            u[i][j]=Grid[j]*dotProduct(x,G[j],3);
         }
     }
     double * TZ = linspace(-n[2],(int)Length[2],1);
@@ -174,7 +175,7 @@ double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double 
         }
         // for Z direction
         for (int  tz = 0; tz < GridZ; tz++){
-            z_direc[i][tz]=M_n(PosIons[i][2]-TZ[tz],n[2]);
+            z_direc[i][tz]=M_n(PosIons[3*i+2]-TZ[tz],n[2]);
         }
     }
     
