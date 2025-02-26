@@ -131,33 +131,20 @@ int main(int argc, char **argv){
 	// grid size for x and y direction
 	// order of bspline interpolation in the x, y and z direction
 	int Kvec[3], grid[3], order[3];
+	for (int i = 0; i < 3; i++){
+		EWALDIn>>garbage>>garbage;
+		EWALDIn>>Kvec[i];
+	}
 
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>Kvec[0];
+	for (int i = 0; i < 3; i++){
+		EWALDIn>>garbage>>garbage;
+		EWALDIn>>grid[i];
+	}
 
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>Kvec[1];
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>Kvec[2];
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>grid[0];
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>grid[1];
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>grid[2];
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>order[0];                             
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>order[1];                             
-
-	EWALDIn>>garbage>>garbage;
-	EWALDIn>>order[2];                             
+	for (int i = 0; i < 3; i++){
+		EWALDIn>>garbage>>garbage;
+		EWALDIn>>order[i];
+	}                    
 
 	EWALDIn.close();
 
