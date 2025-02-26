@@ -51,17 +51,17 @@ $(OBJ_DIR)/func.o:$(SRC_DIR)/func.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/func.o $(INC_LIST)
 $(OBJ_DIR)/dSFMT.o:$(SRC_DIR)/dSFMT.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/dSFMT.o $(INC_LIST)
-$(OBJ_DIR)/print.o:$(SRC_DIR)/print.c
+$(OBJ_DIR)/print.o:$(SRC_DIR)/print.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/print.o $(INC_LIST)
 $(OBJ_DIR)/self.o:$(SRC_DIR)/self.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/self.o $(INC_LIST)
 $(OBJ_DIR)/dist.o:$(SRC_DIR)/dist.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/dist.o $(INC_LIST)
-$(OBJ_DIR)/real.o:$(SRC_DIR)/real.c
+$(OBJ_DIR)/real.o:$(SRC_DIR)/real.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/real.o $(INC_LIST)
 $(OBJ_DIR)/reciprocal.o:$(SRC_DIR)/reciprocal.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reciprocal.o $(INC_LIST)
-$(OBJ_DIR)/reci_integral.o:$(SRC_DIR)/reci_integral.c
+$(OBJ_DIR)/reci_integral.o:$(SRC_DIR)/reci_integral.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_integral.o $(INC_LIST)
 $(OBJ_DIR)/reci_0.o:$(SRC_DIR)/reci_0.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_0.o $(INC_LIST)
@@ -73,7 +73,7 @@ $(OBJ_DIR)/realnreci0.o:$(SRC_DIR)/realnreci0.cpp
 # 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/fiNUFFT.o $(INC_LIST)
 $(OBJ_DIR)/new.o:$(SRC_DIR)/new.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/new.o $(INC_LIST)
-$(OBJ_DIR)/PM2DEwald.o:$(SRC_DIR)/PM2DEwald.C
+$(OBJ_DIR)/PM2DEwald.o:$(SRC_DIR)/PM2DEwald.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/PM2DEwald.o $(INC_LIST)
 
 $(RAT_OUTPUT):$(OBJ_FILES)
