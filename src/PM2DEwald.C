@@ -6,9 +6,9 @@
 #define REAL 0
 #define IMAG 1
 // Disable this declaration if openmp parallelization is not required, would not be helpful for smaller systems
-#define ENABLE_OMP 11
+#define ENABLE_OMP 1
 
-double PM2DEwald(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n){
+double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n){
     // n: order of b-spline interpolation
    // initializing the new variables
     double **u,**x_direc, **y_direc, **z_direc;
@@ -44,7 +44,8 @@ double PM2DEwald(double **PosIons, double *ion_charges, int natoms, double betaa
     // Calculating the fractional coordinates
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 3; j++){
-            u[i][j]=Grid[j]*dotProduct(PosIons[i],G[j],3);
+            double x[3] = {PosIons[3*i],PosIons[3*i+1],PosIons[3*i+2]};
+            u[i][j]=Grid[j]*dotProduct(x,G[j],3);
         }
     }
 
