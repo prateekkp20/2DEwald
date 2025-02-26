@@ -126,7 +126,7 @@ int main(int argc, char **argv){
 		cerr << "File EWALDIn could not be opened" <<endl;
 		exit(1);
 	}
-	
+
 	// convergence limits for the reci sum
 	// grid size for x and y direction
 	// order of bspline interpolation in the x, y and z direction
@@ -227,22 +227,19 @@ int main(int argc, char **argv){
 	getline(PosIn, garbage);
 	getline(PosIn, garbage);
 
-	double **PosIons, *PosIons2, **ForceIons, **vel;
-	int **fixatoms;
+	double **PosIons, *PosIons2, *ForceIons, *vel;
+	int *fixatoms;
 	double *mass;
 
 	mass=new double [natoms];
 	PosIons=new double * [natoms];
 	PosIons2=new double [natoms*3];
-	ForceIons=new double *[natoms];
-	vel=new double *[natoms];
-	fixatoms=new int *[natoms];
+	ForceIons=new double [natoms*3];
+	vel=new double [natoms*3];
+	fixatoms=new int [natoms*3];
 
 	for(i=0;i<natoms;i++){
 		PosIons[i]=new double [3];
-		ForceIons[i]=new double [3];
-		vel[i]=new double [3];		
-		fixatoms[i]=new int [3];
 	}
 
 	//getting positions of each atom
@@ -410,7 +407,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the 2D FT and 1D FI method*/
 	chrono::time_point<std::chrono::system_clock> start3, end3;
 	start3 = chrono::system_clock::now();
-	double recienergy_fft=reciprocal_fft(PosIons, ion_charges, natoms, beta, boxcell, Kvec, grid ,order)*unitzer;
+	double recienergy_fft=reciprocal_fft(PosIons2, ion_charges, natoms, beta, boxcell, Kvec, grid ,order)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy FT: "<<recienergy_fft<<" Kcal/mol"<<"\n";
 	end3 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds3 = end3 - start3;
@@ -420,7 +417,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the 3D FT, with the correction factor */
 	chrono::time_point<std::chrono::system_clock> start8, end8;
 	start8 = chrono::system_clock::now();
-	double recienergy_pm=PM2DEwald(PosIons, ion_charges, natoms, beta, boxcell, grid , Kvec, order)*unitzer;
+	double recienergy_pm=PM2DEwald(PosIons2, ion_charges, natoms, beta, boxcell, grid , Kvec, order)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy Correction: "<<recienergy_pm<<" Kcal/mol"<<"\n";
 	end8 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds8 = end8 - start8;
@@ -430,7 +427,7 @@ int main(int argc, char **argv){
 	/*Reciprocal Energy (k!=0) using the integral method*/
 	chrono::time_point<std::chrono::system_clock> start4, end4;
 	start4 = chrono::system_clock::now();
-	double recienergy_ka=reciprocal_kawata(PosIons, ion_charges, natoms, beta, boxcell, Kvec)*unitzer;
+	double recienergy_ka=reciprocal_kawata(PosIons2, ion_charges, natoms, beta, boxcell, Kvec)*unitzer;
 	cout<<fixed<<setprecision(15)<<"Reciprocal Energy Integral(k!=0): "<<recienergy_ka<<" Kcal/mol"<<"\n";
 	end4 = chrono::system_clock::now();
 	chrono::duration<double> elapsed_seconds4 = end4- start4;
@@ -446,9 +443,9 @@ int main(int argc, char **argv){
 	chrono::duration<double> elapsed_seconds6 = end6- start6;
     time_t end_time6 = std::chrono::system_clock::to_time_t(end6);
 	cout<<fixed<<setprecision(8)<< "Elapsed time: " << elapsed_seconds6.count() << " sec\n\n";
+
 	cout<<fixed<<setprecision(8)<< "Total: "<<recienergy_0+recienergy_fft<<" Kcal/mol"<<"\n";
 	cout<<fixed<<setprecision(8)<< "Time: "<<elapsed_seconds6.count()+elapsed_seconds3.count()<<" sec"<<"\n";
-	// cout<<fixed<<setprecision(8)<<","<<elapsed_seconds6.count() +  elapsed_seconds2.count();
 
 	/*Reciprocal Energy (k==0) + Real Energy*/
 	// chrono::time_point<std::chrono::system_clock> start7, end7;
@@ -494,9 +491,6 @@ int main(int argc, char **argv){
 
 	for(i=0;i<natoms;i++){
 		delete [] PosIons[i];
-		delete [] ForceIons[i];
-		delete [] vel[i];
-		delete [] fixatoms[i];
 	}
 
 	delete [] PosIons;
