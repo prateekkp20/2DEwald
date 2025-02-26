@@ -1,16 +1,16 @@
 ///declare all functions here
 
-void print_lammps_input_file(double **PosIons, float *chg, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename);
+void print_lammps_input_file(double *PosIons, double *chg, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep, char printmode, string filename);
 
-void print_coor(double **PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
+void print_coor(double *PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
 
-void print_carcoor(double **PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
+void print_carcoor(double *PosIons, int natoms, double **boxcell, int n_atomtype, int *natoms_type, string *atomtype, int printtrj, int MDstep,char printmode, string filename);
 
-void printCoor(double **PosIons, int natoms, string *type);
+void printCoor(double *PosIons, int natoms, string *type);
 
-void printFor(double **ForceIons, int natoms, string *type);
+void printFor(double *ForceIons, int natoms, string *type);
 
-void printVel(double **Vel, int natoms, string *type);
+void printVel(double *Vel, int natoms, string *type);
 
 double self(int n_atomtype, int *natoms_type, double *chargs, double betaa);
 
@@ -52,7 +52,6 @@ double error(T2 a, T2 b);
 template<typename T3>
 double percentReduction(T3 newValue, T3 oldValue);
 
-// template<typename T4>
 double* linspace(int a, int b, int num);
 
 double reciprocal_ft_integrand(double h, void *params);
@@ -82,3 +81,5 @@ double C(double t, double n, double gamma, double L);
 double constant_integrand(double t, void *params);
 
 double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, double beta, double gamma);
+
+double reciprocal(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int *M);

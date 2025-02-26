@@ -301,9 +301,9 @@ int main(int argc, char **argv){
 		}
 	}
 
-	// print_carcoor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "CONTCAR");
-	// print_coor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "COOR");
-	// print_lammps_input_file(PosIons, chg, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "exp1box45/e12000.data");
+	// print_carcoor(PosIons2, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "CONTCAR");
+	// print_coor(PosIons2, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "COOR");
+	// print_lammps_input_file(PosIons2, chg, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "data.lmp");
 
 	/*Check for orthogonality of sides*/
 	/*Ewald method only works for unit cell with orthogonal sides*/
