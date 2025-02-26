@@ -12,11 +12,9 @@ void printFor(double **ForceIons, int natoms, string *type);
 
 void printVel(double **Vel, int natoms, string *type);
 
-void printprobVel(double **vel, int natoms, double *mass, float Temp);
-
 double self(int n_atomtype, int *natoms_type, double *chargs, double betaa);
 
-double real(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box, double cutoff);
+double real(double *PosIons, double *charge_prod, int natoms, double betaa, double **box, double cutoff);
 
 double F_0(double val);
 
@@ -28,7 +26,7 @@ double F_kl_0(double sigma, double psi, double beta);
 
 double reciprocal_n2(double **PosIons, double *charge_prod,  double *ion_charges, int natoms, double betaa, double **box, int *K);
 
-double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K);
+double reciprocal_kawata(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K);
 
 double integrand_reciprocal(double h, void *params);
 
@@ -57,11 +55,9 @@ double percentReduction(T3 newValue, T3 oldValue);
 // template<typename T4>
 double* linspace(int a, int b, int num);
 
-double reciprocal_fastft_integrand(double h, void *params);
-
 double reciprocal_ft_integrand(double h, void *params);
 
-double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K, int *Grid, int *n);
+double reciprocal_fft(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K, int *Grid, int *n);
 
 double reciprocal_pppm_chebyshev(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid[], int n[]);
 
@@ -75,7 +71,7 @@ complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_dir
 
 double without(double **PosIons, int natoms, double **box, int *n);
 
-double PM2DEwald(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n);
+double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n);
 
 double hat_function(double s, double gamma, double L);
 
