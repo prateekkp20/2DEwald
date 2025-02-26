@@ -7,7 +7,7 @@ const complex<double> t(0,1);
 #define ENABLE_OMP 1
 
 struct reciprocal_n_params{
-  double** PosIons;
+  double* PosIons;
   double* ion_charges;
   int natoms;
   double betaa;
@@ -19,7 +19,7 @@ struct reciprocal_n_params{
 double integrand_reciprocal(double h, void *params){
     // this integral is over the variable h;
     reciprocal_n_params* p = (struct reciprocal_n_params*)params;
-    double **PosIons = p->PosIons;
+    double *PosIons = p->PosIons;
     double *ion_charges = p->ion_charges;
     int natoms = p->natoms;
     double betaa = p->betaa;
@@ -44,9 +44,7 @@ double integrand_reciprocal(double h, void *params){
             if((k==0) && (l==0))continue;
             complex<double> s_kh=0;
             for (int  i = 0; i < natoms; i++){
-                double G_dot_r=k*G[0]*PosIons[i][0]+l*G[1]*PosIons[i][1]+G[2]*PosIons[i][2];
-                // complex<double> charge(ion_charges[i],0.0);
-                // s_kh+=charge*(cos(G_dot_r)+t*sin(G_dot_r));
+                double G_dot_r=k*G[0]*PosIons[3*i]+l*G[1]*PosIons[3*i+1]+G[2]*PosIons[3*i+2];
                 s_kh+=ion_charges[i]*(cos(G_dot_r)+t*sin(G_dot_r));
             }
             double norm_sg = norm(s_kh);
@@ -57,7 +55,7 @@ double integrand_reciprocal(double h, void *params){
     return reciprocal_energy_i;
 }
 
-double reciprocal_kawata(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K) {
+double reciprocal_kawata(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* K) {
     // this is for Ui
     //Length of the sides of the unit cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
