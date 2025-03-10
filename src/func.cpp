@@ -36,37 +36,11 @@ double F_0(double val){
     return 1-exp_x2-b;
 }
 
-double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, double **box){
-    if(!same_r){
-        double delX=ri[0]-rj[0];
-        double delY=ri[1]-rj[1];
-        double delZ=ri[2]-rj[2];
-        sigma*=2*M_PI;
-        psi*=2*M_PI;
-        double norm_sigma_psi=sqrt(sigma*sigma+psi*psi);
-        double a = cos(sigma*delX+psi*delY)/norm_sigma_psi;
-        double b = exp(delZ*norm_sigma_psi)*erfc(beta*delZ+(norm_sigma_psi/(2*beta)))+exp(-delZ*norm_sigma_psi)*erfc(-beta*delZ+(norm_sigma_psi/(2*beta)));
-        return a*b;
-    }
-    else{
-        double norm_sigma_psi=2*M_PI*sqrt(sigma*sigma+psi*psi);
-        return (2/norm_sigma_psi)*erfc(norm_sigma_psi/(2*beta));
-    }
-    return 0;
-}
-
-double F_kl_0(double sigma, double psi, double beta){
-    double norm_sigma_psi=2*M_PI*sqrt(sigma*sigma+psi*psi);
+double F_kl_0(double norm_sigma_psi, double beta){
     return (2/norm_sigma_psi)*erfc(norm_sigma_psi/(2*beta));
 }
 
-double F_kl_I(double *ri, double *rj, double sigma, double psi, double beta, double **box){
-    double delX=ri[0]-rj[0];
-    double delY=ri[1]-rj[1];
-    double delZ=ri[2]-rj[2];
-    sigma*=2*M_PI;
-    psi*=2*M_PI;
-    double norm_sigma_psi=sqrt(sigma*sigma+psi*psi);
+double F_kl_I(double delX, double delY, double delZ, double sigma, double psi, double norm_sigma_psi, double beta, double **box){
     double a = cos(sigma*delX+psi*delY)/norm_sigma_psi;
     double b = exp(delZ*norm_sigma_psi)*erfc(beta*delZ+(norm_sigma_psi/(2*beta)))+exp(-delZ*norm_sigma_psi)*erfc(-beta*delZ+(norm_sigma_psi/(2*beta)));
     return a*b;
@@ -101,10 +75,10 @@ complex<double>Coeff(double v, double w){
 }
 
 template<typename T2>
-double error(T2 a, T2 b){
-    return abs(a-b);
+double RelError(T2 a, T2 b){
+    return abs((a-b)/a);
 }
-template double error<double>(double, double);
+template double RelError<double>(double, double);
 
 template<typename T3>
 double percentReduction(T3 newValue, T3 oldValue){
@@ -112,32 +86,10 @@ double percentReduction(T3 newValue, T3 oldValue){
 }
 template double percentReduction<double>(double, double);
 
-// template<typename T4>
 double* linspace(int a, int b, int num){
     double * line  = new double[b-a+1];
     for (int i = 0; i < b-a+1; i++){
         line[i] = a+i;
     }
     return line;
-}
-// template int* linspace(int,int,int);
-// template double* linspace(int,int,int);
-
-const complex<double> t(0.0,1.0);
-complex<double> func2(int mx, int my, int Grid, double **x_direc, double **y_direc, double *ion_charges, int natoms, complex<double>* fz_i_h){
-    complex<double> S;
-    double two_pi_mx=2*M_PI*mx,two_pi_my=2*M_PI*my;
-    for(int tx = 0; tx < Grid; tx++){
-        complex<double> Sx=0;
-        for (int ty = 0; ty < Grid; ty++){
-            complex<double> Sy=0;
-            for (int i = 0; i < natoms; i++){
-                Sy+=ion_charges[i]*x_direc[i][tx]*y_direc[i][ty]*fz_i_h[i];
-            }
-            Sx+=Sy*exp((two_pi_my*ty)/Grid*t);
-        }
-        S+=Sx*exp((two_pi_mx*tx)/Grid*t);
-    }
-
-    return S;
 }
