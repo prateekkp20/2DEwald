@@ -4,7 +4,7 @@
 
 #define ENABLE_OMP 1
 
-double real(double *PosIons, double *charge_prod, int natoms, double betaa, double **box, double cutoff){
+double real(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, double cutoff){
     double real_energy=0;
 
     #if defined ENABLE_OMP
@@ -22,7 +22,7 @@ double real(double *PosIons, double *charge_prod, int natoms, double betaa, doub
                     double exp_x2 = exp(-val*val);
                     double t, t1 =  t  = 1/(1+0.3275911*val);
                     double erfcx = exp_x2*(0.254829592*t - 0.284496736*(t*=t1) + 1.421413741*(t*=t1) - 1.453152027*(t*=t1) + 1.061405429*(t*=t1));
-                    real_energy+=(charge_prod[i*(i-1)/2+j]*erfcx)/modR;
+                    real_energy+=(ion_charges[i]*ion_charges[j]*erfcx)/modR;
             }
         }
     
