@@ -12,7 +12,7 @@ struct constant_params{
     int kx; int ky; int kz; double lx; double ly; double lz; double gamma;
 };
 
-double hat_function(double s, double gamma, double L){
+double tophat(double s, double gamma, double L){
     double result = 1/(1+exp(-gamma*(0.5*L+s))) + 1/(1+exp(-gamma*(0.5*L-s))) - 1; // sigmoid type function
     // double result = tanh(gamma*(s+0.5*L)) - tanh(gamma*(s-0.5*L));
     return result;
@@ -25,7 +25,7 @@ double C_integrand(double s, void *params){
     double gamma = p->gamma;
     double n = p->n;
 
-    double result=exp(-s*t*s*t)*cos(2*M_PI*n*s/L)*hat_function(s,gamma,L);
+    double result=exp(-s*t*s*t)*cos(2*M_PI*n*s/L)*tophat(s,gamma,L);
     return result;
 }
 
