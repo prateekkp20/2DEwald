@@ -4,9 +4,9 @@
 
 #define ENABLE_OMP 1
 
-double reci0(double *PosIons2, double *charge_prod, int natoms, double betaa, double **box){
+double reci0(double *PosIons2, double *ion_charges, int natoms, double betaa, double **box){
     double energy = 0;
-    double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
+    double Length[3]={box[0][0],box[1][1],box[2][2]};
 
     #if defined ENABLE_OMP
         omp_set_num_threads(thread::hardware_concurrency());
@@ -15,7 +15,7 @@ double reci0(double *PosIons2, double *charge_prod, int natoms, double betaa, do
     
     for (int  i = 1; i < natoms; i++){
         for (int j = 0; j < i; j++){
-            energy+=charge_prod[i*(i-1)/2+j]*F_0((PosIons2[i*3+2]-PosIons2[j*3+2])*betaa);
+            energy+=ion_charges[i]*ion_charges[j]*F_0((PosIons2[i*3+2]-PosIons2[j*3+2])*betaa);
         }
     }
     
