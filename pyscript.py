@@ -67,7 +67,7 @@ CaCl2 = [2,-1]
 ChargeFile(ChargeFilePath, NaCl)
 
 """Output Files"""
-CSV_File = "Data/Ewald2D/NaCl/B/B4.csv"
+CSV_File = "Data/Ewald2D/NaCl/D/D1.csv"
 
 """Constants"""
 Total = 80
@@ -97,24 +97,24 @@ Repeat = 5
 #         file.write(result.stderr)  # Write stderr in binary format
 
 """Checking the convergence of our work with pppm method"""
-with open(CSV_File, 'wb') as file:
-    for orderx in range(8,12,2):
-        replace_line_in_file(Ewald_File,"nx = ","nx = "+str(orderx))
+# with open(CSV_File, 'wb') as file:
+#     for orderx in range(8,12,2):
+#         replace_line_in_file(Ewald_File,"nx = ","nx = "+str(orderx))
 
-        # for ordery in range(4,12,2):
-        replace_line_in_file(Ewald_File,"ny = ","ny = "+str(orderx))
+#         # for ordery in range(4,12,2):
+#         replace_line_in_file(Ewald_File,"ny = ","ny = "+str(orderx))
 
-        for orderz in range(4,12,2):
-            replace_line_in_file(Ewald_File,"nz = ","nz = "+str(orderz))
+#         for orderz in range(4,12,2):
+#             replace_line_in_file(Ewald_File,"nz = ","nz = "+str(orderz))
 
-            for gridx in [2**n for n in range(4, 8)]:
-                replace_line_in_file(Ewald_File,"gx = ","gx = "+str(gridx))
+#             for gridx in [2**n for n in range(4, 8)]:
+#                 replace_line_in_file(Ewald_File,"gx = ","gx = "+str(gridx))
 
-                # for gridy in [2**n for n in range(4, 8)]:
-                replace_line_in_file(Ewald_File,"gy = ","gy = "+str(gridx))
+#                 # for gridy in [2**n for n in range(4, 8)]:
+#                 replace_line_in_file(Ewald_File,"gy = ","gy = "+str(gridx))
                 
-                for gridz in [2**n for n in range(4, 8)]:
-                    replace_line_in_file(Ewald_File,"gz = ","gz = "+str(gridz))
+#                 for gridz in [2**n for n in range(4, 8)]:
+#                     replace_line_in_file(Ewald_File,"gz = ","gz = "+str(gridz))
 
                     # for kvecx in range(4,8,1):
                         # replace_line_in_file(Ewald_File,"kx = ","kx = "+str(kvecx))
@@ -122,9 +122,25 @@ with open(CSV_File, 'wb') as file:
                         # for kvecy in range(4,8,1):
                             # replace_line_in_file(Ewald_File,"ky = ","ky = "+str(kvecy))
 
-                    for kvecz in range(4,gridz,1):
-                        replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
+                    # for kvecz in range(4,gridz,1):
+                    #     replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
 
-                        result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
-                        file.write(result.stdout)  # Write stdout in binary format
-                        file.write(result.stderr)  # Write stderr in binary format
+                    #     result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
+                    #     file.write(result.stdout)  # Write stdout in binary format
+                    #     file.write(result.stderr)  # Write stderr in binary format
+
+"""Experiment C: Calculating the reciprocal energies using the direct ewald method"""
+with open(CSV_File, 'wb') as file:
+        for i in range(1,Total):
+            replace_line_in_file(Input_File,"Posfile = ","Posfile = "+POSCAR_File+str(i).zfill(3))
+            for kvecz in range(4,100,1):
+                replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
+                result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
+                file.write(result.stdout)  # Write stdout in binary format
+                file.write(result.stderr)  # Write stderr in binary format
+
+"""Experiment D: Varying the vacuum in Z direction and"""
+with open(CSV_File, 'wb') as file:
+    result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
+    file.write(result.stdout)  # Write stdout in binary format
+    file.write(result.stderr)  # Write stderr in binary format
