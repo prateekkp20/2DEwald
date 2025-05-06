@@ -16,6 +16,8 @@ double self(int n_atomtype, int *natoms_type, double *chargs, double betaa);
 
 double real(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, double cutoff);
 
+double realExact(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, double cutoff);
+
 double F_0(double val);
 
 double F_kl(double *ri, double *rj, double sigma, double psi, double beta, bool same_r, double **box);

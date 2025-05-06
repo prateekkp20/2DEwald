@@ -28,3 +28,23 @@ double real(double *PosIons, double *ion_charges, int natoms, double betaa, doub
     
     return real_energy;
 }
+
+double realExact(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, double cutoff){
+    double real_energy=0;
+
+    #if defined ENABLE_OMP
+        omp_set_num_threads(thread::hardware_concurrency());
+        #pragma omp parallel for simd schedule(runtime) reduction(+: real_energy)
+    #endif
+
+        for (int i = 1; i < natoms; i++){
+            for (int j = 0; j < i; j++){
+                    double modR=dist(PosIons,i,j,box);
+                    if(modR>cutoff)continue;
+
+                    real_energy+=(ion_charges[i]*ion_charges[j])*erfc(betaa*modR)/modR;
+            }
+        }
+    
+    return real_energy;
+}
