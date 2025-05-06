@@ -163,9 +163,8 @@ int main(int argc, char **argv){
 
 	// Counting through the types of the atoms present in the cell and storing in the n_atomtype variable
 	int n_atomtype=0;
-	while(StrStream){
-		getline(StrStream, garbage1, ' ');
-		if(garbage1.compare("") != 0)
+	while (getline(StrStream, garbage1, ' ')) {
+		if (garbage1.compare("") != 0)
 			n_atomtype = n_atomtype + 1;
 	}
 	
@@ -173,13 +172,11 @@ int main(int argc, char **argv){
 	atomtype=new string [n_atomtype];
 
 	istringstream strstream(garbage);
-
+	// Slicing the Atoms Name String "garbage" and saving the atoms names in atomtype array
 	tmp = 0;
-
-	while(strstream){
-		getline(strstream, garbage1, ' ');
-		if(garbage1.compare("") != 0){
-			atomtype[tmp]=garbage1;
+	while (getline(strstream, garbage1, ' ')) {
+		if (garbage1.compare("") != 0) {
+			atomtype[tmp] = garbage1;
 			tmp = tmp + 1;
 		}
 	}
@@ -280,6 +277,12 @@ int main(int argc, char **argv){
 	/*Ewald method only works for unit cell with orthogonal sides*/
 	if(dotProduct(boxcell[1],boxcell[0],3) || dotProduct(boxcell[2],boxcell[0],3) || dotProduct(boxcell[1],boxcell[2],3)){
 		cout<<"Error: Unit Cell with Non Orthogonal Sides"<<endl;
+		return 0;
+	}
+
+	/*Order of bspline interpolation should be an even number*/
+	if(order[0]%2 || order[1]%2 || order[2]%2){
+		cout<<"Error: Order of bspline interpolation should be an even number"<<endl;
 		return 0;
 	}
 
