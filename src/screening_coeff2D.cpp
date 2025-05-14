@@ -1,4 +1,4 @@
-// In this file I would be doing the testing for the 2D Ewald with a hat function correction, and the various functions needed to calculate the correction factor 
+// This file has the functions, and data structures to calculate the Screening Function for our modified method 
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
@@ -64,7 +64,7 @@ double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, dou
     F.params = &params;
     double result, error;
     size_t neval;
-    gsl_integration_qng(&F, 0, beta, 1e-8, 1e-7, &result, &error, &neval);
+    gsl_integration_qng(&F, 0, beta, 1e-6, 1e-6, &result, &error, &neval);
     // int gsl_integration_qng(const gsl_function *f, double a, double b, double epsabs, double epsrel, double *result, double *abserr, size_t *neval)
 
     // gsl_integration_qag(&F,0, beta, 1e-4, 1e-2, 200, 3, workspace, &result, &error);// this has less error 
@@ -74,10 +74,3 @@ double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, dou
 
     return result;
 }
-
-// int main(){
-//     cout<<fixed<<setprecision(15)<<C(20,3,400,1)<<endl;
-//     cout<<fixed<<setprecision(15)<<constantterm(2,2,2,10,10,10,5.42/10,400)<<endl;
-//     cout<<"FILE RUNS"<<endl;
-//     return 0;
-// }
