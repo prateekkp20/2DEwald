@@ -203,7 +203,7 @@ int main(int argc, char **argv){
 	}
 	getline(PosIn, garbage);//read the atoms again
 	getline(PosIn, garbage1);
-	
+
 	//get number of atoms for each type
 	for(i=0;i<n_atomtype;i++){
 		PosIn>>natoms_type[i];
@@ -229,6 +229,21 @@ int main(int argc, char **argv){
 	}
 
 	PosIn.close();
+
+	//--------------------------------------- tophat input file ---------------------------------------//
+
+	ifstream TOPHATIn("tophat.in",ios::in);
+	if(!TOPHATIn){
+		cerr << "File TOPHATIn could not be opened" <<endl;
+		exit(1);
+	}
+
+	double gamma;
+	
+	TOPHATIn>>garbage>>garbage;
+	TOPHATIn>>gamma;
+
+	TOPHATIn.close();
 
 	//--------------------------------------- charge input file ---------------------------------------//
 
@@ -335,7 +350,7 @@ int main(int argc, char **argv){
     double L2 = boxcell[1][1];
     double L3 = boxcell[2][2];
 
-	/* B(m1,m2,m3)*Exp(-|G|)/|G| term in the reciprocal loop for direct ewald*/
+	/* Exp(-|G|)/|G| or the screening function term in the reciprocal loop for direct ewald*/
 	ExpFactor = new double [(2*Kvec[0]+1)*(2*Kvec[1]+1)*(2*Kvec[2]+1)];
 	#pragma omp parallel for schedule(runtime) collapse(3)
 	for (int i = -Kvec[0]; i < Kvec[0]+1; i++){
@@ -350,7 +365,7 @@ int main(int argc, char **argv){
                 if(k<0) kk=(2*Kvec[2]+1)+k;
                 else  kk=k;
 				int temp=ii * ((2*Kvec[2]+1) * (2*Kvec[1]+1)) + jj * (2*Kvec[2]+1) + kk;
-				ExpFactor[temp] = constantterm(i,j,k,L1,L2,L3,beta,600);
+				ExpFactor[temp] = constantterm(i,j,k,L1,L2,L3,beta,gamma);
 			}
 		}
 	}
@@ -370,7 +385,7 @@ int main(int argc, char **argv){
                 if(k<0) kk=(2*Kvec[2]+1)+k;
                 else  kk=k;
 				int temp=ii * ((2*Kvec[2]+1) * (2*Kvec[1]+1)) + jj * (2*Kvec[2]+1) + kk;
-				ExpFactorInterpolated[temp] = norm(CoeffX[ii]*CoeffY[jj]*CoeffZ[kk])*constantterm(i,j,k,L1,L2,L3,beta,600);
+				ExpFactorInterpolated[temp] = norm(CoeffX[ii]*CoeffY[jj]*CoeffZ[kk])*constantterm(i,j,k,L1,L2,L3,beta,gamma);
 			}
 		}
 	}
