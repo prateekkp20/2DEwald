@@ -64,7 +64,7 @@ double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, dou
     F.params = &params;
     double result, error;
     size_t neval;
-    gsl_integration_qng(&F, 0, beta, 1e-6, 1e-6, &result, &error, &neval);
+    gsl_integration_qng(&F, 0, beta, 1e-4, 1e-4, &result, &error, &neval);
     // int gsl_integration_qng(const gsl_function *f, double a, double b, double epsabs, double epsrel, double *result, double *abserr, size_t *neval)
 
     // gsl_integration_qag(&F,0, beta, 1e-4, 1e-2, 200, 3, workspace, &result, &error);// this has less error 
