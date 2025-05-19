@@ -97,23 +97,54 @@
 ####################################################
 # New bench marking, 06 Aug task 1
 
+# make clean > terminal.txt
+# make >> terminal.txt
+# locationcsv="separate_p_m/z/out.csv"
+# locationinput="separate_p_m\/z"
+
+# cd run/
+# echo "File,E_long,E_coul,Total" > $locationcsv
+# lastfile=4
+# for i in $(seq 1 $lastfile)
+# do
+#     sed -i "s/Posfile = ${locationinput}\/POSCAR\.$((i-1))/Posfile = ${locationinput}\/POSCAR\.$i/g" input.in
+#     echo -n "POSCAR"$i >> $locationcsv
+#     ./coulomb.x >> $locationcsv
+#     echo " " >> $locationcsv
+#     if [ $i == $lastfile ];then
+#         sed -i "s/Posfile = ${locationinput}\/POSCAR\.$i/Posfile = ${locationinput}\/POSCAR\.0/g" input.in
+#     fi
+# done
+# cd ..
+# rm terminal.txt
+
+#################################################################
+# Combining the real and reci(k==0) and comparing the times, 14 Aug
+
 make clean > terminal.txt
 make >> terminal.txt
-locationcsv="separate_p_m/z/out.csv"
-locationinput="separate_p_m\/z"
+locationcsv="realnreci0/aug15on50atoms_threads3.csv"
+locationinput="fifty"
 
 cd run/
-echo "File,E_long,E_coul,Total" > $locationcsv
-lastfile=4
+echo "File,# of atoms,Real,Reci(k==0),Sum,Real & Reci" > $locationcsv
+
+lastfile=19
 for i in $(seq 1 $lastfile)
 do
     sed -i "s/Posfile = ${locationinput}\/POSCAR\.$((i-1))/Posfile = ${locationinput}\/POSCAR\.$i/g" input.in
     echo -n "POSCAR"$i >> $locationcsv
-    ./coulomb.x >> $locationcsv
+    for j in {1..5}
+    do
+        ./coulomb.x >> $locationcsv
+        echo " " >> $locationcsv
+    done
+    echo " " >> $locationcsv
     echo " " >> $locationcsv
     if [ $i == $lastfile ];then
         sed -i "s/Posfile = ${locationinput}\/POSCAR\.$i/Posfile = ${locationinput}\/POSCAR\.0/g" input.in
     fi
 done
+
 cd ..
 rm terminal.txt
