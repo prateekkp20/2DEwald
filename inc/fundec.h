@@ -73,3 +73,5 @@ double C(double t, double n, double gamma, double L);
 double constant_integrand(double t, void *params);
 
 double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, double beta, double gamma);
+
+double vacuum(double SideLength, double gamma);

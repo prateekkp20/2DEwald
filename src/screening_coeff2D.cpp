@@ -74,3 +74,21 @@ double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, dou
 
     return result;
 }
+
+// Function to find the vacuum for the simulation box for the given Gamma and Side Length
+// It uses binary search to find the window of the tophat function such that our simulation box lies entirely inside it
+// double vacuum(double SideLength, double gamma, double maxVacuum = 1000, double margin = 5){
+double vacuum(double SideLength, double gamma){
+    double maxVacuum = 1000, margin = 5;
+    double high = maxVacuum, low = 2*SideLength;
+    while(high - low > 1){
+        double mid = (high+low)/2;
+        if(tophat(SideLength,gamma,mid) == 1){
+            high = mid;
+        }
+        else{
+            low = mid;
+        }
+    }
+    return margin + round(high * 10) / 10.0;
+}

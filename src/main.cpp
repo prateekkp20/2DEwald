@@ -245,6 +245,9 @@ int main(int argc, char **argv){
 
 	TOPHATIn.close();
 
+	// Finding vacuum
+	boxcell[2][2] = vacuum(boxcell[2][2],gamma);
+	
 	//--------------------------------------- charge input file ---------------------------------------//
 
 	ifstream CHARGEIn("charge.in",ios::in);
