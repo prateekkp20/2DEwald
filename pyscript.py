@@ -68,7 +68,7 @@ CaCl2 = [2,-1]
 ChargeFile(ChargeFilePath, NaCl)
 
 """Output Files"""
-CSV_File = "Data/Ewald2D/NaCl/G/G7.csv"
+CSV_File = "Data/Ewald2D/NaCl/H/H1.csv"
 
 """Constants"""
 Total = 80
@@ -167,48 +167,52 @@ Repeat = 5
 # gammavalues = np.arange(0.21,1.001,0.02)
 # Lvalues = [380,352,328,310,294,278,266,256,246,236,228,220,214,208,202,198,192,188,184,180,176,174,170,168,164,162,160,156,154,152,150,148,146,146,144,142,140,138,138,136]
 
-gammavalues = [1,1.5,2,2.5,3,3.5,4,4.5,5,10,20,35,50]
-Lvalues = [140,110,100,90,85,80,75,75,75,70,70,70,70]
+# gammavalues = [1,1.5,2,2.5,3,3.5,4,4.5,5,10,20,35,50]
+# Lvalues = [140,110,100,90,85,80,75,75,75,70,70,70,70]
 
-with open(CSV_File, 'wb') as file:
-    # for i in range(1,Total):
-    #     POSCARName = POSCAR_File+str(i).zfill(3)
-    #     replace_line_in_file(Input_File,"Posfile = ","Posfile = "+POSCARName)
-
-    for gamma, L in zip(gammavalues, Lvalues):
-        replace_line_in_file(TopHat_File,"gamma ",f"gamma = {gamma:.2f}")
-        replace_line_in_file(POSCAR_File,"     0.0000000000000000    0.0000000000000000   ","     0.0000000000000000    0.0000000000000000   "+f"{round(L+10, 12):.12f}"+"0000")
-
-        for kvecz in range(4,131,1):
-            replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
-            
-            # result = subprocess.run(["./coulomb.x"], shell=True)
-            result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
-            if result.returncode == 0:
-                file.write(result.stdout)  # Write stdout in binary format
-                file.write(result.stderr)  # Write stderr in binary format
-                # print("Error: Integration Library Functions Crashed")
-                # continue
-            else:
-                break
-
-"""Experiment H: for some gamma and L, SPME 2d ewald corrections"""
 # with open(CSV_File, 'wb') as file:
-#     for orderxy in range(4,16,2):
-#         replace_line_in_file(Ewald_File,"nx = ","nx = "+str(orderxy))
-#         replace_line_in_file(Ewald_File,"ny = ","ny = "+str(orderxy))
+#     # for i in range(1,Total):
+#     #     POSCARName = POSCAR_File+str(i).zfill(3)
+#     #     replace_line_in_file(Input_File,"Posfile = ","Posfile = "+POSCARName)
 
-#         for orderz in range(orderxy,16,2):
-#             replace_line_in_file(Ewald_File,"nz = ","nz = "+str(orderz))
+#     for gamma, L in zip(gammavalues, Lvalues):
+#         replace_line_in_file(TopHat_File,"gamma ",f"gamma = {gamma:.2f}")
+#         replace_line_in_file(POSCAR_File,"     0.0000000000000000    0.0000000000000000   ","     0.0000000000000000    0.0000000000000000   "+f"{round(L+10, 12):.12f}"+"0000")
 
-#             for gridxy in [2**n for n in range(4, 8)]:
-#                 replace_line_in_file(Ewald_File,"gx = ","gx = "+str(gridxy))
-#                 replace_line_in_file(Ewald_File,"gy = ","gy = "+str(gridxy))
+#         for kvecz in range(4,131,1):
+#             replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
+            
+#             # result = subprocess.run(["./coulomb.x"], shell=True)
+#             result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
+#             if result.returncode == 0:
+#                 file.write(result.stdout)  # Write stdout in binary format
+#                 file.write(result.stderr)  # Write stderr in binary format
+#                 # print("Error: Integration Library Functions Crashed")
+#                 # continue
+#             else:
+#                 break
 
-#                 for gridz in [2**n for n in range(np.log2(gridxy), 12)]:
-#                     replace_line_in_file(Ewald_File,"gz = ","gz = "+str(gridz))
+"""Experiment H: for some gamma, SPME 2d ewald corrections"""
+gammavalues = [0.2, 0.3, 0.4, 0.5, 0.75, 1, 2.5]
+with open(CSV_File, 'wb') as file:
+    for gamma in gammavalues:
+        replace_line_in_file(TopHat_File,"gamma ",f"gamma = {gamma:.2f}")
+        
+        for orderxy in range(4,16,2):
+            replace_line_in_file(Ewald_File,"nx = ","nx = "+str(orderxy))
+            replace_line_in_file(Ewald_File,"ny = ","ny = "+str(orderxy))
 
-#                     for kvecz in range(4,gridz,1):
-#                         replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
+            for orderz in range(orderxy,16,2):
+                replace_line_in_file(Ewald_File,"nz = ","nz = "+str(orderz))
+
+                for gridxy in [2**n for n in range(4, 8)]:
+                    replace_line_in_file(Ewald_File,"gx = ","gx = "+str(gridxy))
+                    replace_line_in_file(Ewald_File,"gy = ","gy = "+str(gridxy))
+                    
+                    for gridz in [2**n for n in range(np.log2(gridxy), 12)]:
+                        replace_line_in_file(Ewald_File,"gz = ","gz = "+str(gridz))
+                        
+                        for kvecz in range(4,gridz,1):
+                            replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
 
 """Experiment I: Separate positive and negative charges"""
