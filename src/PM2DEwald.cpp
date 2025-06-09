@@ -1,3 +1,4 @@
+/*This file calculates the reciprocal space energy using the new method*/
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
@@ -10,7 +11,7 @@
 
 double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n){
     // n: order of b-spline interpolation
-   // initializing the new variables
+    // initializing the new variables for charge interpolation
     double **u,**x_direc, **y_direc, **z_direc;
     u= new double * [natoms];
     x_direc= new double * [natoms];
@@ -103,7 +104,7 @@ double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa,
                     #if defined ENABLE_OMP
                         #pragma omp atomic update
                     #endif
-                    in[tx * (Grid[2] * Grid[1]) + ty * Grid[2] + tz][0] += ion_charges[j] * x_direc[j][tx] * y_direc[j][ty] * z_direc[j][tz];
+                    in[tx * (Grid[2] * Grid[1]) + ty * Grid[2] + tz][REAL] += ion_charges[j] * x_direc[j][tx] * y_direc[j][ty] * z_direc[j][tz];
                 }
             }
         }
@@ -136,7 +137,7 @@ double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa,
 
                 double norm_FQ=out[temp][REAL]*out[temp][REAL]+out[temp][IMAG]*out[temp][IMAG];
 
-                energy += norm_FQ*ExpFactorInterpolated[tempexpfactor]; //update ebergy
+                energy += norm_FQ*ExpFactorInterpolated[tempexpfactor]; //update energy
             }
         }
     }
