@@ -353,6 +353,9 @@ int main(int argc, char **argv){
     double L2 = boxcell[1][1];
     double L3 = boxcell[2][2];
 
+	/*Define the number of threads*/
+	omp_set_num_threads(thread::hardware_concurrency());
+
 	/* Exp(-|G|)/|G| or the screening function term in the reciprocal loop for direct ewald*/
 	ExpFactor = new double [(2*Kvec[0]+1)*(2*Kvec[1]+1)*(2*Kvec[2]+1)];
 	#pragma omp parallel for schedule(runtime) collapse(3)
