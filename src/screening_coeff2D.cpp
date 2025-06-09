@@ -77,6 +77,7 @@ double constantterm(int kx, int ky, int kz, double lx, double ly, double lz, dou
 
 // Function to find the vacuum for the simulation box for the given Gamma and Side Length
 // It uses binary search to find the window of the tophat function such that our simulation box lies entirely inside it
+// Parameters: maxVacuum and maxVacuum are optional and can be modified according to the needs of accuracy in the tophat function
 double vacuum(double SideLength, double gamma, double maxVacuum, double margin){
     if(tophat(SideLength,gamma,maxVacuum)!=1){
         printf("Error: Simulation box does not fit inside the tophat window. Exiting.\n");
