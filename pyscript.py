@@ -68,7 +68,7 @@ CaCl2 = [2,-1]
 ChargeFile(ChargeFilePath, NaCl)
 
 """Output Files"""
-CSV_File = "Data/Ewald2D/NaCl/H/H1.csv"
+CSV_File = "Data/Ewald2D/NaCl/H/H3.csv"
 
 """Constants"""
 Total = 80
@@ -193,7 +193,9 @@ Repeat = 5
 #                 break
 
 """Experiment H: for some gamma, SPME 2d ewald corrections"""
-gammavalues = [0.2, 0.3, 0.4, 0.5, 0.75, 1, 2.5]
+gammavalues = [1, 2.5, 10]
+# gammavalues = [0.35, 0.5, 0.8, 1, 2.5, 10]
+# gammavalues = [0.2, 0.3, 0.4, 0.5, 0.75, 1, 2.5]
 with open(CSV_File, 'wb') as file:
     for gamma in gammavalues:
         replace_line_in_file(TopHat_File,"gamma ",f"gamma = {gamma:.2f}")
@@ -209,10 +211,21 @@ with open(CSV_File, 'wb') as file:
                     replace_line_in_file(Ewald_File,"gx = ","gx = "+str(gridxy))
                     replace_line_in_file(Ewald_File,"gy = ","gy = "+str(gridxy))
                     
-                    for gridz in [2**n for n in range(np.log2(gridxy), 12)]:
+                    for gridz in [2**n for n in range(int(np.log2(gridxy)), 11)]: # 
                         replace_line_in_file(Ewald_File,"gz = ","gz = "+str(gridz))
                         
                         for kvecz in range(4,gridz,1):
+                            if kvecz > 120:
+                                break
                             replace_line_in_file(Ewald_File,"kz = ","kz = "+str(kvecz))
 
+                            result = subprocess.run(["./coulomb.x"], stdout=PIPE, stderr=PIPE)
+                            if result.returncode == 0:
+                                file.write(result.stdout)  # Write stdout in binary format
+                                file.write(result.stderr)  # Write stderr in binary format
+                                # print("Error: Integration Library Functions Crashed")
+                                # continue
+                            else:
+                                break
+                            
 """Experiment I: Separate positive and negative charges"""
