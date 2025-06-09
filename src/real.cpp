@@ -8,7 +8,6 @@ double real(double *PosIons, double *ion_charges, int natoms, double betaa, doub
     double real_energy=0;
 
     #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
         #pragma omp parallel for simd schedule(runtime) reduction(+: real_energy)
     #endif
 
@@ -33,7 +32,6 @@ double realExact(double *PosIons, double *ion_charges, int natoms, double betaa,
     double real_energy=0;
 
     #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
         #pragma omp parallel for simd schedule(runtime) reduction(+: real_energy)
     #endif
 

@@ -81,7 +81,6 @@ double reciprocal_ft_integrand(double h, void *params){
 
 double reciprocal_fft(double **PosIons, double *ion_charges, int natoms, double betaa, double **box, int K, int Grid, int n){
     // this is for Ui
-    omp_set_num_threads(thread::hardware_concurrency());
     // Edge lengths of the cell
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 

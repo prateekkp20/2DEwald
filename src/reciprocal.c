@@ -8,9 +8,6 @@ const complex<double> t(0,1);
 
 double reciprocal_n2(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int *K){
     double reciprocal_energy_i=0;
-    #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
-    #endif
     // this is the loop for Ui
     double Length[3]={box[0][0],box[1][1],box[2][2]};
     for (int k = -K[0]; k < K[0]+1; k++){
@@ -48,11 +45,10 @@ double reciprocal_n2(double *PosIons, double *ion_charges, int natoms, double be
     return (M_PI/(2*Length[0]*Length[1]))*reciprocal_energy_i;
 }
 
-/*This Method is for the correction methods that we have introduced without the use of any particle-mesh methods*/
+/*This Method is for the correction methods that we have introduced using the tophat function for ewald summation without the use of any particle-mesh methods*/
 double reciprocal_modified(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int *K){
     double reci_energy=0;
     #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
         #pragma omp parallel for schedule(runtime) reduction(+: reci_energy) collapse(3)
     #endif
     for (int kx = -K[0]; kx < K[0]+1; kx++){

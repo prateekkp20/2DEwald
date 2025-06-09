@@ -1,3 +1,4 @@
+/*This file calculates the reciprocal space energy (k=0), method given by parry*/
 #include "libinclude.h"
 #include "const.h"
 #include "fundec.h"
@@ -9,7 +10,6 @@ double reci0(double *PosIons2, double *ion_charges, int natoms, double betaa, do
     double Length[3]={box[0][0],box[1][1],box[2][2]};
 
     #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
         #pragma omp parallel for schedule(runtime) reduction(+: energy)
     #endif
     

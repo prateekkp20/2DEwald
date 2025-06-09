@@ -29,10 +29,6 @@ double integrand_reciprocal(double h, void *params){
 
     double reciprocal_energy_i=0;
 
-    #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
-    #endif
-
     double G[3]={2*M_PI/Length[0], 2*M_PI/Length[1], h};
     double bet = 4*betaa*betaa;
     #if defined ENABLE_OMP
