@@ -32,10 +32,6 @@ double integrand_reciprocal(double h, void *params);
 
 double reci0(double **PosIons, float *ion_charges, int natoms, double betaa, float **box);
 
-vector<double> realnreci0(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff);
-
-void realnreci01(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, double cutoff, double &energy0, double &energy1);
-
 double dist(double **PosIons, int atom1, int atom2, float **box);
 
 // void distWithZ(double **PosIons, int atom1, int atom2, float **box, vector<double> &out);
@@ -62,5 +58,3 @@ double reciprocal_fft_integrand(double h, void *params);
 double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
 
 double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
-
-double reciprocal_pppm_chebyshev(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
