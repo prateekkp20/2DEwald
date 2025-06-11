@@ -52,9 +52,3 @@ double error(T2 a, T2 b);
 
 template<typename T3>
 double percentReduction(T3 newValue, T3 oldValue);
-
-double reciprocal_fft_integrand(double h, void *params);
-
-double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n);
-
-double reciprocal_pppm(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid[], int n[]);
