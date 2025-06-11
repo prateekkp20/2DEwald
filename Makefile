@@ -52,11 +52,11 @@ $(OBJ_DIR)/self.o:$(SRC_DIR)/self.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/self.o $(INC_LIST)
 $(OBJ_DIR)/dist.o:$(SRC_DIR)/dist.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/dist.o $(INC_LIST)
-$(OBJ_DIR)/real.o:$(SRC_DIR)/real.c
+$(OBJ_DIR)/real.o:$(SRC_DIR)/real.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/real.o $(INC_LIST)
 $(OBJ_DIR)/reciprocal.o:$(SRC_DIR)/reciprocal.c
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reciprocal.o $(INC_LIST)
-$(OBJ_DIR)/reci_integral.o:$(SRC_DIR)/reci_integral.c
+$(OBJ_DIR)/reci_integral.o:$(SRC_DIR)/reci_integral.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_integral.o $(INC_LIST)
 $(OBJ_DIR)/reci_0.o:$(SRC_DIR)/reci_0.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_0.o $(INC_LIST)
