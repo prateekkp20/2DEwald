@@ -57,13 +57,6 @@ double reciprocal_fft_integrand(double h, void *params){
 
     // initializing the new variables
 
-    // Structure Factor 
-    // complex<double> **StructFact;
-    // StructFact = new complex<double> *[Grid];
-    // for (int  i = 0; i < Grid; i++){
-    //     StructFact[i] = new complex<double> [Grid];
-    // }
-
     // G: Reciprocal Vectors
     // u: the fractional coordinates in x and y directions
     // x_direc, y_direc, z_direc: the cofficients in the x,y and z directions for the Q Matrix
@@ -142,10 +135,11 @@ double reciprocal_fft_integrand(double h, void *params){
 
     for (int x = 0; x < Grid; x++){
         for (int y = 0; y < Grid; y++){
-            in[x * Grid + y][0] = 0.0;
-            in[x * Grid + y][1] = 0.0;
+            in[x * Grid + y][REAL] = 0.0;
+            in[x * Grid + y][IMAG] = 0.0;
         }
     }
+
     // Final Q Matrix after the fourier integral along the z direction
     for (int tz = tz_min; tz <= tz_max; tz++){
         if (natoms == 0) continue;
@@ -183,11 +177,7 @@ double reciprocal_fft_integrand(double h, void *params){
             int temp = ii * Grid + jj;
             double factor = FourPiPi * (i*i+j*j) + h*h;
             double norm_FQ = out[temp][REAL]*out[temp][REAL]+out[temp][IMAG]*out[temp][IMAG];
-            // cout<<setprecision(18)<<norm_FQ<<"\n";
-            // cout<<setprecision(18)<<reciprocal_energy_i<<"\n";
-            // cout<<setprecision(30)<<-factor/deno<<"\n";
-            // cout<<setprecision(18)<<norm_FQ * exp(-factor/deno) * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n)) /factor<<"\n";
-            // cout<<setprecision(18)<<norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n))<<"\n";
+
             reciprocal_energy_i+= norm_FQ  * norm(Coeff(TwoPi_Grid*i,n)*Coeff(TwoPi_Grid*j,n)*Coeff(h,n)) / (factor*exp(factor/deno));
 
         }
@@ -196,9 +186,7 @@ double reciprocal_fft_integrand(double h, void *params){
     return reciprocal_energy_i;
 }
 
-
 double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double betaa, float **box, int K, int Grid, int n){
-    // this is for Ui
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc(1000);
 
     gsl_function F;
@@ -210,15 +198,5 @@ double reciprocal_fft(double **PosIons, float *ion_charges, int natoms, double b
     gsl_integration_qagi(&F, 1e-7, 1e-2, 1000, workspace, &result, &error);
     gsl_integration_workspace_free(workspace); // Free workspace memory
     
-    double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
-    double reciprocal_energy_o=0;
-
-    // this is the loop for Uo
-    for (int  i = 0; i < natoms; i++){
-        for (int j = 0; j < natoms; j++){
-            reciprocal_energy_o+=ion_charges[i]*ion_charges[j]*F_0(PosIons[i][2]-PosIons[j][2],betaa);
-        }
-    }
     return result;
-    // return sqrt(M_PI)*reciprocal_energy_o/(Length[0]*Length[1])+result;
 }
