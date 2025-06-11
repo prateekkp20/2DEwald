@@ -261,6 +261,8 @@ int main(int argc, char **argv){
 		}		
 	}
 
+	omp_set_num_threads(thread::hardware_concurrency());
+
 	// print_carcoor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "CONTCAR");
 	// print_coor(PosIons, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "COOR");
 	// print_lammps_input_file(PosIons, chg, natoms, boxcell,  n_atomtype, natoms_type, atomtype, 0, i,'w', "exp1box45/e12000.data");

@@ -9,7 +9,6 @@ double reci0(double **PosIons, float *ion_charges, int natoms, double betaa, flo
     double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
 
     #if defined ENABLE_OMP
-        omp_set_num_threads(thread::hardware_concurrency());
         #pragma omp parallel for schedule(runtime) reduction(+: energy)
     #endif
     

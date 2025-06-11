@@ -3,7 +3,7 @@
 #include "const.h"
 #include "fundec.h"
 
-// #define ENABLE_OMP 1
+#define ENABLE_OMP 1
 
 struct reciprocal_n_params{
   double** PosIons;
@@ -64,9 +64,6 @@ double reciprocal_kawata(double **PosIons, float *ion_charges, int natoms, doubl
     double result, error;
     gsl_integration_qagi(&F, 1e-8, 1e-2, 100, workspace, &result, &error);
     gsl_integration_workspace_free(workspace); // Free workspace memory
-
-    double Length[3]={sqrt(dotProduct(box[0],box[0],3)),sqrt(dotProduct(box[1],box[1],3)),sqrt(dotProduct(box[2],box[2],3))};
-    double reciprocal_energy_o=0;
 
     return result;
 }
