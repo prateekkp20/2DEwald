@@ -1,6 +1,6 @@
 CC = /usr/bin/g++	
 DEBUGFLAGS = -Wall
-OPTFLAGS = -O3 -fopenmp -pthread -L/home/prateek/gsl/lib -I/home/prateek/gsl/include #this needs to be changed to the location of installation of gsl in your local computer
+OPTFLAGS = -O3 -fopenmp -gdwarf-3 -pthread -L/home/prateek/gsl/lib -I/home/prateek/gsl/include #this needs to be changed to the location of installation of gsl in your local computer
 FFTFLAGS = -lfftw3_threads -lfftw3 -lm -lfftw3_omp
 GSLFLAGS = -lgsl -lgslcblas -lm
 
@@ -62,7 +62,7 @@ $(OBJ_DIR)/reci_0.o:$(SRC_DIR)/reci_0.cpp
 	$(CC) -DDSFMT_MEXP=19937 -c $^ $(OPTFLAGS) -o  $(OBJ_DIR)/reci_0.o $(INC_LIST)
 
 $(RAT_OUTPUT):$(OBJ_FILES)
-	$(CC) $(OPTFLAGS) $(INC_LIST) -o $(RAT_OUTPUT) $(OBJ_FILES) $(FFTFLAGS) $(GSLFLAGS)
+	$(CC) $(OPTFLAGS) $(INC_LIST) -o $(RAT_OUTPUT) $(OBJ_FILES) $(FFTFLAGS) $(GSLFLAGS) $(DEBUGFLAGS)
 
 # Clean objects and library
 clean:
