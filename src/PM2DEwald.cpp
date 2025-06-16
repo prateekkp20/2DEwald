@@ -12,14 +12,13 @@
 double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n){
     // n: order of b-spline interpolation
     // initializing the new variables for charge interpolation
-    double **u,**x_direc, **y_direc, **z_direc;
-    u= new double * [natoms];
+    double *u,**x_direc, **y_direc, **z_direc;
+    u= new double [natoms*3];
     x_direc= new double * [natoms];
     y_direc= new double * [natoms];
     z_direc= new double * [natoms];
 
     for (int  i = 0; i < natoms; i++){
-        u[i] = new double  [3];
         x_direc[i] = new double  [Grid[0]];
         y_direc[i] = new double  [Grid[1]];
         z_direc[i] = new double  [Grid[2]];
@@ -45,7 +44,7 @@ double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa,
     for (int i = 0; i < natoms; i++){
         for (int j = 0; j < 3; j++){
             double x[3] = {PosIons[3*i],PosIons[3*i+1],PosIons[3*i+2]};
-            u[i][j]=Grid[j]*dotProduct(x,G[j],3);
+            u[3*i+j]=Grid[j]*dotProduct(x,G[j],3);
         }
     }
 
@@ -58,21 +57,21 @@ double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa,
         for (int  k1 = 0; k1 < Grid[0]; k1++){
             x_direc[i][k1]=0;
             for (int  n1 = -n_max; n1 < n_max+1; n1++){
-                x_direc[i][k1]+=M_n(u[i][0]-k1-n1*Grid[0],n[0]);
+                x_direc[i][k1]+=M_n(u[3*i+0]-k1-n1*Grid[0],n[0]);
             }
         }
         // for Y direction
         for (int  k2 = 0; k2 < Grid[1]; k2++){
             y_direc[i][k2]=0;
             for (int  n2 = -n_max; n2 < n_max+1; n2++){
-                y_direc[i][k2]+=M_n(u[i][1]-k2-n2*Grid[1],n[1]);
+                y_direc[i][k2]+=M_n(u[3*i+1]-k2-n2*Grid[1],n[1]);
             }
         }
         // for Z direction
         for (int  k3 = 0; k3 < Grid[2]; k3++){
             z_direc[i][k3]=0;
             for (int  n3 = -n_max; n3 < n_max+1; n3++){
-                z_direc[i][k3]+=M_n(u[i][2]-k3-n3*Grid[2],n[2]);
+                z_direc[i][k3]+=M_n(u[3*i+2]-k3-n3*Grid[2],n[2]);
             }
         }
     }
