@@ -330,80 +330,12 @@ int main(int argc, char **argv){
         for (int q = 0; q < 3; q++)
             G[x][q] /= volume;
 
-	/*Useful configuration independent Computations for the reciprocal space summation*/
-	/*Cofficients Bi[mi] of the bspline interpolation*/ //Refer to Essmann et al.
-	// The negative indices are stored from the end of the array
-	CoeffX = new complex<double> [2*Kvec[0]+1];
-    CoeffY = new complex<double> [2*Kvec[1]+1];
-    CoeffZ = new complex<double> [2*Kvec[2]+1];
-	double TwoPi_Gridx = 2*M_PI/grid[0];
-    double TwoPi_Gridy = 2*M_PI/grid[1];
-    double TwoPi_Gridz = 2*M_PI/grid[2];
-	for (int i = -Kvec[0]; i < Kvec[0]+1; i++){
-        int ic;
-        if(i<0) {ic=(2*Kvec[0]+1)+i;}
-        else {ic=i;}
-        CoeffX[ic] = Coeff(TwoPi_Gridx*i,order[0]);
-    }
-	for (int i = -Kvec[1]; i < Kvec[1]+1; i++){
-        int ic;
-        if(i<0) {ic=(2*Kvec[1]+1)+i;}
-        else {ic=i;}
-        CoeffY[ic] = Coeff(TwoPi_Gridy*i,order[1]);
-    }
-	for (int i = -Kvec[2]; i < Kvec[2]+1; i++){
-        int ic;
-        if(i<0) {ic=(2*Kvec[2]+1)+i;}
-        else {ic=i;}
-        CoeffZ[ic] = Coeff(TwoPi_Gridz*i,order[2]);
-    }
-
-    double L1 = boxcell[0][0];
-    double L2 = boxcell[1][1];
-    double L3 = boxcell[2][2];
-
 	/*Define the number of threads*/
 	omp_set_num_threads(thread::hardware_concurrency());
-
-	/* Exp(-|G|)/|G| or the screening function term in the reciprocal loop for direct ewald*/
-	ExpFactor = new double [(2*Kvec[0]+1)*(2*Kvec[1]+1)*(2*Kvec[2]+1)];
-	#pragma omp parallel for schedule(runtime) collapse(3)
-	for (int i = -Kvec[0]; i < Kvec[0]+1; i++){
-        for (int j = -Kvec[1]; j< Kvec[1]+1; j++){
-            for (int k = -Kvec[2]; k < Kvec[2]+1; k++){
-				if(i==0&&j==0&&k==0)continue;
-				int ii,jj,kk;
-				if(i<0) ii=(2*Kvec[0]+1)+i;
-                else ii=i;
-                if(j<0) jj=(2*Kvec[1]+1)+j;
-                else  jj=j;
-                if(k<0) kk=(2*Kvec[2]+1)+k;
-                else  kk=k;
-				int temp=ii * ((2*Kvec[2]+1) * (2*Kvec[1]+1)) + jj * (2*Kvec[2]+1) + kk;
-				ExpFactor[temp] = constantterm(i,j,k,L1,L2,L3,beta,gamma);
-			}
-		}
-	}
-
-	/* B(m1,m2,m3)*Exp(-|G|)/|G| term in the reciprocal loop for SPME*/
-	ExpFactorInterpolated = new double [(2*Kvec[0]+1)*(2*Kvec[1]+1)*(2*Kvec[2]+1)];
-	#pragma omp parallel for schedule(runtime) collapse(3)
-	for (int i = -Kvec[0]; i < Kvec[0]+1; i++){
-        for (int j = -Kvec[1]; j< Kvec[1]+1; j++){
-            for (int k = -Kvec[2]; k < Kvec[2]+1; k++){
-				if(i==0&&j==0&&k==0)continue;
-				int ii,jj,kk;
-				if(i<0) ii=(2*Kvec[0]+1)+i;
-                else ii=i;
-                if(j<0) jj=(2*Kvec[1]+1)+j;
-                else  jj=j;
-                if(k<0) kk=(2*Kvec[2]+1)+k;
-                else  kk=k;
-				int temp=ii * ((2*Kvec[2]+1) * (2*Kvec[1]+1)) + jj * (2*Kvec[2]+1) + kk;
-				ExpFactorInterpolated[temp] = norm(CoeffX[ii]*CoeffY[jj]*CoeffZ[kk])*constantterm(i,j,k,L1,L2,L3,beta,gamma);
-			}
-		}
-	}
+	
+	#if defined RECIPROCAL_KAWATA_SPME || defined RECIPROCAL_NEW_SPME
+		SPME_Coeff(Kvec, grid, order);
+	#endif
 
 	/*Self Energy*/
 	#if defined SELF
@@ -473,6 +405,9 @@ int main(int argc, char **argv){
 
 	/*Reciprocal Energy (k!=0) direct summation with the correction factor */
 	#if defined RECIPROCAL_NEW
+		ExpFactor = new double [(2*Kvec[0]+1)*(2*Kvec[1]+1)*(2*Kvec[2]+1)];
+		ScreenFunction(Kvec,gamma,beta,boxcell);
+
 		chrono::time_point<std::chrono::system_clock> start9, end9;
 		start9 = chrono::system_clock::now();
 		double recienergy_correction=reciprocal_modified(PosIons2, ion_charges, natoms, beta, boxcell, Kvec)*unitzer;
@@ -485,6 +420,10 @@ int main(int argc, char **argv){
 
 	/*Reciprocal Energy (k!=0) using the 3D FT, with the correction factor with SPME*/
 	#if defined RECIPROCAL_NEW_SPME
+		/* B(m1,m2,m3)*Exp(-|G|)/|G| term in the reciprocal loop for SPME*/
+		ExpFactorInterpolated = new double [(2*Kvec[0]+1)*(2*Kvec[1]+1)*(2*Kvec[2]+1)];
+		ScreenFunctionSPME(Kvec, grid, order, gamma, beta, boxcell);
+
 		chrono::time_point<std::chrono::system_clock> start8, end8;
 		start8 = chrono::system_clock::now();
 		double recienergy_pm=PM2DEwald(PosIons2, ion_charges, natoms, beta, boxcell, grid , Kvec, order)*unitzer;
