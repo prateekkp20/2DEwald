@@ -12,17 +12,11 @@
 double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa, double **box, int* Grid, int *M, int* n){
     // n: order of b-spline interpolation
     // initializing the new variables for charge interpolation
-    double *u,**x_direc, **y_direc, **z_direc;
+    double *u, *x_direc, *y_direc, *z_direc;
     u= new double [natoms*3];
-    x_direc= new double * [natoms];
-    y_direc= new double * [natoms];
-    z_direc= new double * [natoms];
-
-    for (int  i = 0; i < natoms; i++){
-        x_direc[i] = new double  [Grid[0]];
-        y_direc[i] = new double  [Grid[1]];
-        z_direc[i] = new double  [Grid[2]];
-    }
+    x_direc= new double [natoms*Grid[0]];
+    y_direc= new double [natoms*Grid[1]];
+    z_direc= new double [natoms*Grid[2]];
 
     double L1 = box[0][0];
     double L2 = box[1][1];
@@ -55,23 +49,23 @@ double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa,
     for (int i = 0; i < natoms; i++){
         // for X direction
         for (int  k1 = 0; k1 < Grid[0]; k1++){
-            x_direc[i][k1]=0;
+            x_direc[Grid[0]*i+k1]=0;
             for (int  n1 = -n_max; n1 < n_max+1; n1++){
-                x_direc[i][k1]+=M_n(u[3*i+0]-k1-n1*Grid[0],n[0]);
+                x_direc[Grid[0]*i+k1]+=M_n(u[3*i+0]-k1-n1*Grid[0],n[0]);
             }
         }
         // for Y direction
         for (int  k2 = 0; k2 < Grid[1]; k2++){
-            y_direc[i][k2]=0;
+            y_direc[Grid[1]*i+k2]=0;
             for (int  n2 = -n_max; n2 < n_max+1; n2++){
-                y_direc[i][k2]+=M_n(u[3*i+1]-k2-n2*Grid[1],n[1]);
+                y_direc[Grid[1]*i+k2]+=M_n(u[3*i+1]-k2-n2*Grid[1],n[1]);
             }
         }
         // for Z direction
         for (int  k3 = 0; k3 < Grid[2]; k3++){
-            z_direc[i][k3]=0;
+            z_direc[Grid[2]*i+k3]=0;
             for (int  n3 = -n_max; n3 < n_max+1; n3++){
-                z_direc[i][k3]+=M_n(u[3*i+2]-k3-n3*Grid[2],n[2]);
+                z_direc[Grid[2]*i+k3]+=M_n(u[3*i+2]-k3-n3*Grid[2],n[2]);
             }
         }
     }
@@ -92,17 +86,17 @@ double PM2DEwald(double *PosIons, double *ion_charges, int natoms, double betaa,
     for (int j = 0; j < natoms; j++){
         if (ion_charges[j] == 0)continue;
         for (int tx = 0; tx < Grid[0]; tx++){
-            if (x_direc[j][tx] == 0)continue;
+            if (x_direc[Grid[0]*j+tx] == 0)continue;
 
             for (int ty = 0; ty < Grid[1]; ty++){
-                if (y_direc[j][ty] == 0)continue;
+                if (y_direc[Grid[1]*j+ty] == 0)continue;
 
                 for (int tz = 0; tz < Grid[2]; tz++){
-                    if (z_direc[j][tz] == 0)continue;
+                    if (z_direc[Grid[2]*j+tz] == 0)continue;
                     #if defined ENABLE_OMP
                         #pragma omp atomic update
                     #endif
-                    in[tx * (Grid[2] * Grid[1]) + ty * Grid[2] + tz][REAL] += ion_charges[j] * x_direc[j][tx] * y_direc[j][ty] * z_direc[j][tz];
+                    in[tx * (Grid[2] * Grid[1]) + ty * Grid[2] + tz][REAL] += ion_charges[j] * x_direc[Grid[0]*j+tx] * y_direc[Grid[1]*j+ty] * z_direc[Grid[2]*j+tz];
                 }
             }
         }
