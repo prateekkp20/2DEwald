@@ -334,6 +334,9 @@ int main(int argc, char **argv){
 	omp_set_num_threads(thread::hardware_concurrency());
 	
 	#if defined RECIPROCAL_KAWATA_SPME || defined RECIPROCAL_NEW_SPME
+	    CoeffX = new complex<double> [2*Kvec[0]+1];
+		CoeffY = new complex<double> [2*Kvec[1]+1];
+		CoeffZ = new complex<double> [2*Kvec[2]+1];
 		SPME_Coeff(Kvec, grid, order);
 	#endif
 

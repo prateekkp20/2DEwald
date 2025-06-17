@@ -155,9 +155,7 @@ void ScreenFunction(int *Kvec, double gamma, double beta, double** boxcell){
  * @param order Pointer to an array of 3 integers specifying the interpolation order for each direction.
  */
 void SPME_Coeff(int *Kvec, int* grid, int* order){
-    CoeffX = new complex<double> [2*Kvec[0]+1];
-    CoeffY = new complex<double> [2*Kvec[1]+1];
-    CoeffZ = new complex<double> [2*Kvec[2]+1];
+
 	double TwoPi_Gridx = 2*M_PI/grid[0];
     double TwoPi_Gridy = 2*M_PI/grid[1];
     double TwoPi_Gridz = 2*M_PI/grid[2];
